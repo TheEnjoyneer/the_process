@@ -1,0 +1,11 @@
+WEB
+1
+https://www.footballoutsiders.com/stats/fei/2019
+
+Selection=1
+Formatting=All
+PreFormattedTextToColumns=True
+ConsecutiveDelimitersAsOne=False
+SingleBlockTextImport=True
+DisableDateRecognition=False
+DisableRedirections=False

@@ -1,0 +1,11 @@
+WEB
+1
+http://www.espn.com/college-football/statistics/teamratings
+
+Selection=1
+Formatting=RTF
+PreFormattedTextToColumns=True
+ConsecutiveDelimitersAsOne=False
+SingleBlockTextImport=True
+DisableDateRecognition=False
+DisableRedirections=False

@@ -1,0 +1,11 @@
+WEB
+1
+http://www.espn.com/college-football/statistics/teamratings/_/tab/efficiency
+
+Selection=1
+Formatting=All
+PreFormattedTextToColumns=True
+ConsecutiveDelimitersAsOne=False
+SingleBlockTextImport=True
+DisableDateRecognition=False
+DisableRedirections=False

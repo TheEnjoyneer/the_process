@@ -1,0 +1,11 @@
+WEB
+1
+https://www.teamrankings.com/college-football/stat/punt-attempts-per-game
+
+Selection=1
+Formatting=None
+PreFormattedTextToColumns=True
+ConsecutiveDelimitersAsOne=False
+SingleBlockTextImport=True
+DisableDateRecognition=False
+DisableRedirections=False
