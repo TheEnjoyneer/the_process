@@ -1,7 +1,7 @@
 # teamDataImport.py
 # Christopher Brant
-# Fall of 2019
-# BCRI Data Import Class V1
+# Fall 2019
+# BCRI Data Import Class V2
 
 import requests, json, datetime
 from urllib.parse import quote
