@@ -11,11 +11,13 @@ class infoRequest():
 	# Initialize with the desired year
 	def __init__(self, given_year):
 		self.year = given_year
+		self.headers = {"accept": "application/json", "Authorization": "pCTgkDkbCkcTh4OWrzO4ph5+/VR/5Fp98y4ORuZCbiG0HKTXt+8Xbs88IfVu4lK9"}
+		self.api_url = "https://api.collegefootballdata.com/"
 
 	# Basic information request to collect all team information
 	# Remember you have to give the year as an argument
 	def teamInfo(self):
-		apiString = "https://api.collegefootballdata.com/teams/fbs?year="
+		apiString = self.api_url + "teams/fbs?year="
 		teams = requests.get(apiString + str(self.year))
 		if teams.status_code == 200:
 			return teams.json()
@@ -34,7 +36,7 @@ class infoRequest():
 
 	# Creates a list of conferences for FBS teams
 	def conferences(self):
-		apiString = "https://api.collegefootballdata.com/conferences"
+		apiString = self.api_url + "conferences"
 		conf = requests.get(apiString)
 		if conf.status_code == 200:
 			confList = []
@@ -64,7 +66,7 @@ class infoRequest():
 
 	# Get a teams drive stats
 	def getDriveStats(self, teamName):
-		apiString1 = "https://api.collegefootballdata.com/drives?year="
+		apiString = self.api_url + "drives?year="
 		apiString2 = "&team="
 		response = requests.get(apiString1 + str(self.year) + apiString2 + quote(teamName))
 		if response.status_code == 200:
@@ -77,7 +79,7 @@ class infoRequest():
 
 	# Get a team's advanced stats
 	def getAdvStats(self, teamName):
-		apiString1 = "https://api.collegefootballdata.com/stats/season/advanced?year="
+		apiString = self.api_url + "stats/season/advanced?year="
 		apiString2 = "&team="
 		apiString3 = "&excludeGarbageTime=true"
 		response = requests.get(apiString1 + str(self.year) + apiString2 + quote(teamName) + apiString3)
@@ -101,7 +103,7 @@ class infoRequest():
 
 	# Get team opponent list
 	def getOpponents(self, teamName):
-		apiString1 = "https://api.collegefootballdata.com/games?year="
+		apiString = self.api_url + "games?year="
 		apiString2 = "&team="
 		response = requests.get(apiString1 + str(self.year) + apiString2 + quote(teamName))
 		if response.status_code == 200:
@@ -120,7 +122,7 @@ class infoRequest():
 
 	# Get team opponent win percentage
 	def getWinPercent(self, teamName):
-		apiString1 = "https://api.collegefootballdata.com/games?year="
+		apiString = self.api_url + "games?year="
 		apiString2 = "&team="
 		response = requests.get(apiString1 + str(self.year) + apiString2 + quote(teamName))
 		if response.status_code == 200:
@@ -152,7 +154,7 @@ class infoRequest():
 
 	# Get a team's betting stats on the season
 	def getTeamBetData(self, teamName):
-		apiString = "https://api.collegefootballdata.com/lines?year="
+		apiString = self.api_url + "lines?year="
 		stats = requests.get(apiString + str(self.year) + "&team=" + teamName)
 		if stats.status_code == 200:
 			betData = stats.json()
@@ -171,7 +173,7 @@ class infoRequest():
 
 
 	def getTeamHomeBetData(self, teamName):	
-		apiString = "https://api.collegefootballdata.com/lines?year="
+		apiString = self.api_url + "lines?year="
 		stats = requests.get(apiString + str(self.year) + "&team=" + teamName + "&home=" + teamName)
 		if stats.status_code == 200:
 			betData = stats.json()
@@ -190,7 +192,7 @@ class infoRequest():
 
 
 	def getTeamAwayBetData(self, teamName):
-		apiString = "https://api.collegefootballdata.com/lines?year="
+		apiString = self.api_url + "lines?year="
 		stats = requests.get(apiString + str(self.year) + "&team=" + teamName + "&away=" + teamName)
 		if stats.status_code == 200:
 			betData = stats.json()
@@ -395,100 +397,6 @@ def main():
 		if i > 5:
 			break
 		print(str(i) + ") " + team[0] + ": %4.3f" %(team[1]))
-
-
-
-
-
-	# floridaAdv = data.getAdvStats("Florida")
-	# clemsonAdv = data.getAdvStats("Clemson")
-	# auburnAdv = data.getAdvStats("Auburn")
-	# ohiostateAdv = data.getAdvStats("Ohio State")
-	# bamaAdv = data.getAdvStats("Alabama")
-	# riceAdv = data.getAdvStats("Rice")
-	# massAdv = data.getAdvStats("UMass")
-
-	# floridaAdvOff = data.getAdvOff(floridaAdv)
-	# clemsonAdvOff = data.getAdvOff(clemsonAdv)
-	# auburnAdvOff = data.getAdvOff(auburnAdv)
-	# ohiostateAdvOff = data.getAdvOff(ohiostateAdv)
-	# bamaAdvOff = data.getAdvOff(bamaAdv)
-	# riceAdvOff = data.getAdvOff(riceAdv)
-	# massAdvOff = data.getAdvOff(massAdv)
-
-	# floridaDrives = data.getDriveStats("Florida")
-	# clemsonDrives = data.getDriveStats("Clemson")
-	# auburnDrives = data.getDriveStats("Auburn")
-	# ohiostateDrives = data.getDriveStats("Ohio State")
-	# bamaDrives = data.getDriveStats("Alabama")
-	# riceDrives = data.getDriveStats("Rice")
-	# massDrives = data.getDriveStats("UMass")
-
-	# floridaOffRating = calc.calcOffRating(floridaAdvOff, floridaDrives, "Florida")
-	# clemsonOffRating = calc.calcOffRating(clemsonAdvOff, clemsonDrives, "Clemson")
-	# auburnOffRating = calc.calcOffRating(auburnAdvOff, auburnDrives, "Auburn")
-	# ohiostateOffRating = calc.calcOffRating(ohiostateAdvOff, ohiostateDrives, "Ohio State")
-	# bamaOffRating = calc.calcOffRating(bamaAdvOff, bamaDrives, "Alabama")
-	# riceOffRating = calc.calcOffRating(riceAdvOff, riceDrives, "Rice")
-	# massOffRating = calc.calcOffRating(massAdvOff, massDrives, "UMass")
-
-	# floridaAdvDef = data.getAdvDef(floridaAdv)
-	# clemsonAdvDef = data.getAdvDef(clemsonAdv)
-	# auburnAdvDef = data.getAdvDef(auburnAdv)
-	# ohiostateAdvDef = data.getAdvDef(ohiostateAdv)
-	# bamaAdvDef = data.getAdvDef(bamaAdv)
-	# riceAdvDef = data.getAdvDef(riceAdv)
-	# massAdvDef = data.getAdvDef(massAdv)
-
-	# floridaDefRating = calc.calcDefRating(floridaAdvDef, floridaDrives, "Florida")
-	# clemsonDefRating = calc.calcDefRating(clemsonAdvDef, clemsonDrives, "Clemson")
-	# auburnDefRating = calc.calcDefRating(auburnAdvDef, auburnDrives, "Auburn")
-	# ohiostateDefRating = calc.calcDefRating(ohiostateAdvDef, ohiostateDrives, "Ohio State")
-	# bamaDefRating = calc.calcDefRating(bamaAdvDef, bamaDrives, "Alabama")
-	# riceDefRating = calc.calcDefRating(riceAdvDef, riceDrives, "Rice")
-	# massDefRating = calc.calcDefRating(massAdvDef, massDrives, "UMass")
-
-	# floridaSOR = getStrengthOfRecord(data, "Florida")
-	# clemsonSOR = getStrengthOfRecord(data, "Clemson")
-	# auburnSOR = getStrengthOfRecord(data, "Auburn")
-	# ohiostateSOR = getStrengthOfRecord(data, "Ohio State")
-	# bamaSOR = getStrengthOfRecord(data, "Alabama")
-	# riceSOR = getStrengthOfRecord(data, "Rice")
-	# massSOR = getStrengthOfRecord(data, "UMass")
-
-	# print("\nOffense")
-	# print("Florida Offense: ", floridaOffRating)
-	# print("Clemson Offense: ", clemsonOffRating)
-	# print("Auburn Offense: ", auburnOffRating)
-	# print("Ohio State Offense: ", ohiostateOffRating)
-	# print("Alabama Offense: ", bamaOffRating)
-	# print("Rice Offense: ", riceOffRating)
-	# print("UMass Offense: ", massOffRating)
-	# print("\nDefense")
-	# print("Florida Defense: ", floridaDefRating)
-	# print("Clemson Defense: ", clemsonDefRating)
-	# print("Auburn Defense: ", auburnDefRating)
-	# print("Ohio State Defense: ", ohiostateDefRating)
-	# print("Alabama Defense: ", bamaDefRating)
-	# print("Rice Defense: ", riceDefRating)
-	# print("UMass Defense: ", massDefRating)
-	# print("\nOverall")
-	# print("Florida Overall: ", calc.calcTeamRating(floridaOffRating, floridaDefRating, floridaSOR))
-	# print("Clemson Overall: ", calc.calcTeamRating(clemsonOffRating, clemsonDefRating, clemsonSOR))
-	# print("Auburn Overall: ", calc.calcTeamRating(auburnOffRating, auburnDefRating, auburnSOR))
-	# print("Ohio State Overall: ", calc.calcTeamRating(ohiostateOffRating, ohiostateDefRating, ohiostateSOR))
-	# print("Alabama Overall: ", calc.calcTeamRating(bamaOffRating, bamaDefRating, bamaSOR))
-	# print("Rice Overall: ", calc.calcTeamRating(riceOffRating, riceDefRating, riceSOR))
-	# print("UMass Overall: ", calc.calcTeamRating(massOffRating, massDefRating, massSOR))
-	# print("\nStrength of Schedule")
-	# print("Florida SoS: ", floridaSOR)
-	# print("Clemson SoS: ", clemsonSOR)
-	# print("Auburn Sos: ", auburnSOR)
-	# print("Ohio State SoS: ", ohiostateSOR)
-	# print("Alabama SoS: ", bamaSOR)
-	# print("Rice SoS: ", riceSOR)
-	# print("UMass SoS: ", massSOR)
-
 
 
 if __name__ == "__main__":
