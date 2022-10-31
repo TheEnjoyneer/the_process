@@ -1,9 +1,23 @@
 # Test Script
 
-import teamDataImport
+import teamDataImport as tdi
+from pprint import pprint
+import json
 
-data = teamDataImport.infoRequest(2019)
-calc = teamDataImport.calcStats()
+
+data = tdi.infoRequest(2022)
+floridaData = data.getAdvSeasonStats("Florida")
+
+floridaOff = data.getAdvOff(floridaData)
+floridaDef = data.getAdvDef(floridaData)
+
+pprint(floridaOff)
+print('\n\n\n')
+pprint(floridaDef)
+
+
+# data = teamDataImport.infoRequest(2019)
+# calc = teamDataImport.calcStats()
 
 # floridaAdv = data.getAdvStats("Florida")
 # clemsonAdv = data.getAdvStats("Clemson")
