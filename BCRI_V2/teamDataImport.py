@@ -27,67 +27,35 @@ class infoRequest():
 		self.year = given_year
 		self.exclude_garbage_time = True
 
-	# # Basic information request to collect all team information
-	# # Remember you have to give the year as an argument
-	# def teamInfo(self):
-	# 	apiString = self.api_url + "teams/fbs?year="
-	# 	teams = requests.get(apiString + str(self.year), headers=self.headers)
-	# 	if teams.status_code == 200:
-	# 		return teams.json()
-	# 	else:
-	# 		print("\nError: Issue in teamInfo with status code: ", teams.status_code)
-	# 		return -1
+	def getTeams(self):
+		try:
+			api_instance = cfbd.TeamsApi(configuration)
+			api_response = api_instance.get_fbs_teams(year=self.year)
+			teamsData = pd.DataFrame.from_records([t.to_dict() for t in api_response])
+			return teamsData
+		except ApiException as e:
+			print("Exception when calling TeamsApi->get_fbs_teams: %s\n" % e)
 
-
-	# # Creates a list of strings that are all FBS team names
-	# def teamNames(self, teams):
-	# 	teamNameList = []
-	# 	for team in teams:
-	# 		teamNameList.append(team["school"])
-	# 	return teamNameList
-
-
-	# # Creates a list of conferences for FBS teams
-	# def conferences(self):
-	# 	apiString = self.api_url + "conferences"
-	# 	conf = requests.get(apiString, headers=self.headers)
-	# 	if conf.status_code == 200:
-	# 		confList = []
-	# 		for c in conf.json():
-	# 			confList.append(c["name"])
-	# 		return confList
-	# 	else:
-	# 		print("\nError: Issue in conferences with status code: ", conf.status_code)
-	# 		return -1
-
-
-	# # Searches for a teams info based on school name
-	# def teamSearch(self, teams, teamName):
-	# 	for team in teams:
-	# 		if team["school"] == teamName:
-	# 			return team
-
-
-	# # Returns list of teams from that conference
-	# def confTeams(self, teams, conf):
-	# 	teamList = []
-	# 	for team in teams:
-	# 		if team["conference"] == conf:
-	# 			teamList.append(team["school"])
-	# 	return teamList
-
-
-	# # Get a teams drive stats
-	# def getDriveStats(self, teamName):
-	# 	apiString = self.api_url + "drives?year="
-	# 	apiString2 = "&team="
-	# 	response = requests.get(apiString1 + str(self.year) + apiString2 + quote(teamName), headers=self.headers)
-	# 	if response.status_code == 200:
-	# 		stats = response.json()
-	# 		return stats
-	# 	else:
-	# 		print("\nError: Issue in getDriveStats with status code: ", response.status_code)
-	# 		return -1
+		# Get a team's advanced stats for the season
+	def getGames(self):
+		try:
+			api_instance = cfbd.GamesApi(configuration)
+			api_response = api_instance.get_games(year=self.year, season_type='both')
+			gamesData = pd.DataFrame.from_records([g.to_dict() for g in api_response])
+			# Filter out FCS opponent games and unplayed games
+			teams = self.getTeams()
+			teams = teams['school']
+			gamesData = gamesData[(gamesData['home_team'].isin(teams)) & (gamesData['away_team'].isin(teams))]
+			gamesData = gamesData[
+			(gamesData['home_points'] == gamesData['home_points'])
+			& (gamesData['away_points'] == gamesData['away_points'])
+			& (pd.notna(gamesData['home_conference'])) 
+			& (pd.notna(gamesData['away_conference']))
+			]
+			return gamesData
+		except ApiException as e:
+			print("Exception when calling GamesApi->get_games: %s\n" % e)
+			return -1
 
 
 	# Get a team's advanced stats for a specific game
@@ -122,116 +90,64 @@ class infoRequest():
 		return teamAdvStats.defense
 
 
-# 	# Get team opponent list
-# 	def getOpponents(self, teamName):
-# 		apiString1 = self.api_url + "games?year="
-# 		apiString2 = "&team="
-# 		response = requests.get(apiString1 + str(self.year) + apiString2 + quote(teamName), headers=self.headers)
-# 		if response.status_code == 200:
-# 			opponentList = []
-# 			for game in response.json():
-# 				if game["home_team"] == teamName:
-# 					opponentList.append(game["away_team"])
-# 				else:
-# 					opponentList.append(game["home_team"])
 
-# 			return opponentList
-# 		else:
-# 			print("\nError: Issue in getOpponents with status code: ", response.status_code)
-# 			return -1
+class calcStats():
 
+	def basicSRS(self, gamesData):
+		# Set home field advantage to static 2.5 points for now
+		gamesData['home_spread'] = np.where(gamesData['neutral_site'] == True, gamesData['home_points'] - gamesData['away_points'], (gamesData['home_points'] - gamesData['away_points'] - 2.5))
+		gamesData['away_spread'] = -gamesData['home_spread']
 
-# 	# Get team opponent win percentage
-# 	def getWinPercent(self, teamName):
-# 		apiString1 = self.api_url + "games?year="
-# 		apiString2 = "&team="
-# 		response = requests.get(apiString1 + str(self.year) + apiString2 + quote(teamName), headers=self.headers)
-# 		if response.status_code == 200:
-# 			wins = 0
-# 			losses = 0
-# 			for game in response.json():
-# 				if game["home_points"] == None or game["away_points"] == None:
-# 					# Do nothing
-# 					pass
-# 				elif game["home_team"] == teamName and (game["home_points"] >= game["away_points"]):
-# 					wins += 1
-# 				elif game["away_team"] == teamName and (game["away_points"] >= game["home_points"]):
-# 					wins += 1
-# 				else:
-# 					losses += 1
-# 			if (wins + losses) == 0:
-# 				return 0
-# 			else:
-# 				return (wins / (wins + losses))
-# 		else:
-# 			print("\nError: Issue in getWinPercent with status code: ", response.status_code)
-# 			return -1
+		# Clean up data for team names and spreads
+		teams = pd.concat([
+			gamesData[['home_team', 'home_spread', 'away_team']].rename(columns={'home_team': 'team', 'home_spread': 'spread', 'away_team': 'opponent'}),
+			gamesData[['away_team', 'away_spread', 'home_team']].rename(columns={'away_team': 'team', 'away_spread': 'spread', 'home_team': 'opponent'})
+		])
 
+		# Set maximum scoring margin to static 28 for now.
+		teams['spread'] = np.where(teams['spread'] > 35, 35, teams['spread'])
+		teams['spread'] = np.where(teams['spread'] < -35, -35, teams['spread'])
 
-# 	# Get a matchup's trends
-# 	def getMatchupTrends(self, team1, team2):
-# 		return
+		# Get the mean spreads per team
+		spreads = teams.groupby('team').spread.mean()
 
+		# create empty arrays
+		terms = []
+		solutions = []
 
-# 	# Get a team's betting stats on the season
-# 	def getTeamBetData(self, teamName):
-# 		apiString = self.api_url + "lines?year="
-# 		stats = requests.get(apiString + str(self.year) + "&team=" + teamName)
-# 		if stats.status_code == 200:
-# 			betData = stats.json()
-# 			apiString = "https://api.collegefootballdata.com/lines?year="
-# 			stats = requests.get(apiString + str(self.year) + "&seasonType=postseason&team=" + teamName, headers=self.headers)
-# 			if stats.status_code == 200:
-# 				for i in stats.json():
-# 					betData.append(i)
-# 				return betData
-# 			else:
-# 				print("\nError in getTeamBetData")
-# 				return -1
-# 		else:
-# 			print("\nError: Issue in getTeamBetTrends with status code: ", teams.status_code)
-# 			return -1
+		for team in spreads.keys():
+			row = []
+			# get a list of team opponents
+			opps = list(teams[teams['team'] == team]['opponent'])
+
+			for opp in spreads.keys():
+				if opp == team:
+					# coefficient for the team should be 1
+					row.append(1)
+				elif opp in opps:
+					# coefficient for opponents should be 1 over the number of opponents
+					row.append(-1.0/len(opps))
+				else:
+					# teams not faced get a coefficient of 0
+					row.append(0.000001)
+
+			terms.append(row)
+
+			# average game spread on the other side of the equation
+			solutions.append(spreads[team])
+		
+		# Solve the system of equations here
+		solutions = np.linalg.solve(np.array(terms), np.array(solutions))
+
+		# Add team names back to a new dataframe
+		ratings = list(zip(spreads.keys(), solutions))
+		srs = pd.DataFrame(ratings, columns=['team', 'rating'])
+		rankings = srs.sort_values('rating', ascending=False).reset_index()[['team', 'rating']]
+
+		return rankings
 
 
-# 	def getTeamHomeBetData(self, teamName):	
-# 		apiString = self.api_url + "lines?year="
-# 		stats = requests.get(apiString + str(self.year) + "&team=" + teamName + "&home=" + teamName, headers=self.headers)
-# 		if stats.status_code == 200:
-# 			betData = stats.json()
-# 			apiString = "https://api.collegefootballdata.com/lines?year="
-# 			stats = requests.get(apiString + str(self.year) + "&seasonType=postseason&team=" + teamName, headers=self.headers)
-# 			if stats.status_code == 200:
-# 				for i in stats.json():
-# 					betData.append(i)
-# 				return betData
-# 			else:
-# 				print("\nError in getTeamBetData")
-# 				return -1
-# 		else:
-# 			print("\nError: Issue in getTeamBetTrends with status code: ", teams.status_code)
-# 			return -1
 
-
-# 	def getTeamAwayBetData(self, teamName):
-# 		apiString = self.api_url + "lines?year="
-# 		stats = requests.get(apiString + str(self.year) + "&team=" + teamName + "&away=" + teamName, headers=self.headers)
-# 		if stats.status_code == 200:
-# 			betData = stats.json()
-# 			apiString = "https://api.collegefootballdata.com/lines?year="
-# 			stats = requests.get(apiString + str(self.year) + "&seasonType=postseason&team=" + teamName, headers=self.headers)
-# 			if stats.status_code == 200:
-# 				for i in stats.json():
-# 					betData.append(i)
-# 				return betData
-# 			else:
-# 				print("\nError in getTeamBetData")
-# 				return -1
-# 		else:
-# 			print("\nError: Issue in getTeamBetTrends with status code: ", teams.status_code)
-# 			return -1
-
-
-# class calcStats():
 # 	# Definitions
 # 	explosiveness_weight = 0.45
 # 	success_weight = 0.40
