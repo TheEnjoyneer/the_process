@@ -3,8 +3,8 @@
 *  Protractor is used in this example for compatibility with Angular documentation tools.
 */
 import { bootstrapApplication,provideProtractorTestingSupport } from '@angular/platform-browser';
-import { AppComponent } from './app/app.component';
+import { FrontPageComponent } from './app/front-page/front-page.component';
 
-bootstrapApplication(AppComponent,
+bootstrapApplication(FrontPageComponent,
     {providers: [provideProtractorTestingSupport()]})
   .catch(err => console.error(err));
