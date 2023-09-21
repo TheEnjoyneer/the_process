@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { NgFor } from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import { HttpClient } from '@angular/common/http';
@@ -8,13 +9,11 @@ import { HttpClientModule } from '@angular/common/http';
   selector: 'app-matchup-card',
   templateUrl: './matchup-card.component.html',
   standalone: true,
-  imports: [ MatCardModule, MatButtonModule ],
+  imports: [ MatCardModule, MatButtonModule, NgFor,  ],
   styleUrls: ['./matchup-card.component.css']
 })
 export class MatchupCardComponent implements OnInit {
   newdata:any;
-
-  longText = "Testing here we go bitches!";
 
   constructor(private http: HttpClient) { }
 
@@ -24,7 +23,7 @@ export class MatchupCardComponent implements OnInit {
 
   getData() {
 	 // this.http.get('http://127.0.0.1:5000/topGame').map(response => response.json()).subscribe(data => this.newdata = data);
-    this.http.get('http://127.0.0.1:5000/topGame').subscribe(data => {
+    this.http.get('http://127.0.0.1:5000/gameCards').subscribe(data => {
       console.log(data)
       this.newdata = data;//JSON.stringify(data);
       });

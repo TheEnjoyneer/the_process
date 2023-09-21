@@ -1,12 +1,18 @@
-<mat-card class="example-card">
-    <mat-card-header>
-      <mat-card-title>{{newdata?.matchup}}</mat-card-title>
-      <mat-card-subtitle>{{newdata?.conferences}}</mat-card-subtitle>
-    </mat-card-header>
+<div *ngFor="let game of newdata">
+   <mat-card class="example-card">
     <mat-card-content>
-        <p>{{longText}}</p>
+        <p>{{game?.matchup}}</p>
+        <p>{{game?.conferences}}</p>
+        <p>Venue: {{game?.venue}}</p>
+        <p>Line Provider: {{game?.provider}}</p>
+        <p>Current Spread: {{game?.currSpread}}</p>
+        <p>Opening Spread: {{game?.openSpread}}</p>
+        <p>Current Total: {{game?.currTotal}}</p>
+        <p>Opening Total: {{game?.openTotal}}</p>
+        <p>Home Moneyline: {{game?.moneyline}}</p>
+        <mat-card-actions class="example-action">
+            <button mat-button>FULL PREVIEW</button>
+        </mat-card-actions>
     </mat-card-content>
-    <mat-card-actions>
-      <button mat-button>FULL PREVIEW</button>
-    </mat-card-actions>
   </mat-card>
+</div>
