@@ -5,6 +5,7 @@ import { MatchupCardComponent } from '../matchup-card/matchup-card.component';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatToolbarModule} from '@angular/material/toolbar';
+import { PopViewService } from '../_services';
 
 @Component({
   selector: 'app-front-page',
@@ -14,11 +15,11 @@ import {MatToolbarModule} from '@angular/material/toolbar';
     MatchupCardComponent,
     MatToolbarModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
   ],
   templateUrl: './front-page.component.html',
   styleUrls: ['./front-page.component.css']
 })
 export class FrontPageComponent {
-
+  constructor(protected popviewService: PopViewService) { }
 }

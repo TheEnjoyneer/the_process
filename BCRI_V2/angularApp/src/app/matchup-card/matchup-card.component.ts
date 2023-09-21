@@ -4,18 +4,20 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import { HttpClient } from '@angular/common/http';
 import { HttpClientModule } from '@angular/common/http';
+import { PopViewService } from '../_services';
+import { PopViewComponent } from '../pop-view/pop-view.component';
 
 @Component({
   selector: 'app-matchup-card',
   templateUrl: './matchup-card.component.html',
   standalone: true,
-  imports: [ MatCardModule, MatButtonModule, NgFor,  ],
+  imports: [ MatCardModule, MatButtonModule, NgFor, PopViewComponent ],
   styleUrls: ['./matchup-card.component.css']
 })
 export class MatchupCardComponent implements OnInit {
   newdata:any;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, protected popviewService: PopViewService) { }
 
   ngOnInit() {
 	this.getData();
@@ -29,3 +31,4 @@ export class MatchupCardComponent implements OnInit {
       });
   }
 }
+

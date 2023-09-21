@@ -11,8 +11,13 @@
         <p>Opening Total: {{game?.openTotal}}</p>
         <p>Home Moneyline: {{game?.moneyline}}</p>
         <mat-card-actions class="example-action">
-            <button mat-button>FULL PREVIEW</button>
+            <button mat-button (click)="popviewService.open(game?.gameID)">FULL PREVIEW</button>
         </mat-card-actions>
     </mat-card-content>
   </mat-card>
+  <app-pop-view [id]='game?.gameID'>
+    <h1>A Game Preview Pop Up</h1>
+    <p style="padding-bottom: 500px;">Close with the button below or by clicking the background.</p>
+    <button (click)="popviewService.close()">Close</button>
+    </app-pop-view>
 </div>
