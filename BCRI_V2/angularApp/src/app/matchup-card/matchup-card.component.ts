@@ -14,6 +14,8 @@ import { HttpClientModule } from '@angular/common/http';
 export class MatchupCardComponent implements OnInit {
   newdata:any;
 
+  longText = "Testing here we go bitches!";
+
   constructor(private http: HttpClient) { }
 
   ngOnInit() {
