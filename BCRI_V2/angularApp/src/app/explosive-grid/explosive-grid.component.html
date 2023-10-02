@@ -1,0 +1,85 @@
+
+<div *ngIf="teamSel == '1'" class="leftTable">
+    <table>
+        <caption>Explosiveness</caption>
+        <tr>
+            <th class="leftTDlabs">Offense</th>
+            <td class="leftTDvals" [style]="{'background-color': this.colors.offEx}">{{textStats.offEx}}</td>
+        </tr>
+        <tr>
+            <td class="leftTDlabs">Pass</td>
+            <td class="leftTDvals" [style]="{'background-color': this.colors.offPassEx}">{{textStats.offPassEx}}</td>
+        </tr>
+        <tr>
+            <td class="leftTDlabs">Rush</td>
+            <td class="leftTDvals" [style]="{'background-color': this.colors.offRushEx}">{{textStats.offRushEx}}</td>
+        </tr>
+        <tr>
+            <th class="leftTDlabs">Defense</th>
+            <td class="leftTDvals" [style]="{'background-color': this.colors.defEx}">{{textStats.defEx}}</td>
+        </tr>
+        <tr>
+            <td class="leftTDlabs">Pass</td>
+            <td class="leftTDvals" [style]="{'background-color': this.colors.defPassEx}">{{textStats.defPassEx}}</td>
+        </tr>
+        <tr>
+            <td class="leftTDlabs">Rush</td>
+            <td class="leftTDvals" [style]="{'background-color': this.colors.defRushEx}">{{textStats.defRushEx}}</td>
+        </tr>
+        <tr>
+            <th class="leftTDlabs">Havoc</th>
+            <td class="leftTDvals" [style]="{'background-color': this.colors.havoc}">{{textStats.havoc}}%</td>
+        </tr>
+        <tr>
+            <td class="leftTDlabs">F7</td>
+            <td class="leftTDvals" [style]="{'background-color': this.colors.havocF7}">{{textStats.havocF7}}%</td>
+        </tr>
+        <tr>
+            <td class="leftTDlabs">DBs</td>
+            <td class="leftTDvals" [style]="{'background-color': this.colors.havocDb}">{{textStats.havocDb}}%</td>
+        </tr>
+    </table>
+</div>
+
+<div *ngIf="teamSel == '2'" class="rightTable">
+    <table>
+        <caption>Explosiveness</caption>
+        <tr>
+            <td class="rightTDvals" [style]="{'background-color': this.colors.offEx}">{{textStats.offEx}}</td>
+            <th class="rightTDlabs">Offense</th>
+        </tr>
+        <tr>
+            <td class="rightTDvals" [style]="{'background-color': this.colors.offPassEx}">{{textStats.offPassEx}}</td>
+            <td class="rightTDlabs">Pass</td>
+        </tr>
+        <tr>
+            <td class="rightTDvals" [style]="{'background-color': this.colors.offRushEx}">{{textStats.offRushEx}}</td>
+            <td class="rightTDlabs">Rush</td>
+        </tr>
+        <tr>
+            <td class="rightTDvals" [style]="{'background-color': this.colors.defEx}">{{textStats.defEx}}</td>
+            <th class="rightTDlabs">Defense</th>
+        </tr>
+        <tr>
+            <td class="rightTDvals" [style]="{'background-color': this.colors.defPassEx}">{{textStats.defPassEx}}</td>
+            <td class="rightTDlabs">Pass</td>
+        </tr>
+        <tr>
+            <td class="rightTDvals" [style]="{'background-color': this.colors.defRushEx}">{{textStats.defRushEx}}</td>
+            <td class="rightTDlabs">Rush</td>
+        </tr>
+        <tr>
+            <td class="rightTDvals" [style]="{'background-color': this.colors.havoc}">{{textStats.havoc}}%</td>
+            <th class="rightTDlabs">Havoc</th>
+        </tr>
+        <tr>
+            <td class="rightTDvals" [style]="{'background-color': this.colors.havocF7}">{{textStats.havocF7}}%</td>
+            <td class="rightTDlabs">F7</td>
+        </tr>
+        <tr>
+            <td class="rightTDvals" [style]="{'background-color': this.colors.havocDb}">{{textStats.havocDb}}%</td>
+            <td class="rightTDlabs">DBs</td>
+        </tr>
+    </table>
+</div>
+

@@ -4,13 +4,12 @@
 # Base Data Import Testing File
 
 from __future__ import print_function
-import time
 import datetime
 from datetime import date
 import cfbd
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
+#import numpy as np
+#import pandas as pd
+#import matplotlib.pyplot as plt
 from cfbd.rest import ApiException
 from pprint import pprint
 
@@ -23,7 +22,9 @@ class weekClass:
 class cfbGame:
 	def __init__(self, gameObj):
 		self.lines = []
+		self.homeWinProb = None
 		self.venue = None
+		self.location = None
 		self.homeEpa = None
 		self.homeAdvStats = None
 		self.homeRank = None
@@ -35,23 +36,43 @@ class cfbGame:
 		self.rankOnRank = False
 		self.homeLogo = None
 		self.awayLogo = None
+		self.homePostWinProb = None
+		self.awayPostWinProb = None
+		self.startDate = gameObj.start_date
+		self.completed = gameObj.completed
 		self.homeTeam =  gameObj.home_team
 		self.awayTeam = gameObj.away_team
-		self.homeCon = str(gameObj.home_conference)
-		self.awayCon = str(gameObj.away_conference)
-		self.confGame = False
-		if self.homeCon == self.awayCon:
-			self.confGame = True
+		self.homeTeamAbbr = None
+		self.awayTeamAbbr = None
+		self.homeAbbrRank = None
+		self.awayAbbrRank = None
+		self.confGame = gameObj.conference_game
 		self.gameID = gameObj.id
-		if hasattr(gameObj, "start_date"):
-			self.startDate = gameObj.start_date
-		if hasattr(gameObj, "lines"):
-			linesList = gameObj.lines
-			for item in linesList:
-				if item.provider == "Bovada":
-					self.lines.append(item)
-		if hasattr(gameObj, "venue"):
-			self.venue = gameObj.venue	
+		self.venue = gameObj.venue
+		if str(gameObj.home_conference) == "FBS Independents":
+			self.homeCon = "FBS INDs"
+		elif str(gameObj.home_conference) == "Conference USA":
+			self.homeCon = "C-USA"
+		elif str(gameObj.home_conference) == "Mid-American":
+			self.homeCon = "MAC"
+		elif str(gameObj.home_conference) == "American Athletic":
+			self.homeCon = "AAC"
+		elif str(gameObj.home_conference) == "Mountain West":
+			self.homeCon = "MWC"
+		else:
+			self.homeCon = str(gameObj.home_conference)
+		if str(gameObj.away_conference) == "FBS Independents":
+			self.awayCon = "FBS INDs"
+		elif str(gameObj.away_conference) == "Conference USA":
+			self.awayCon = "C-USA"
+		elif str(gameObj.away_conference) == "Mid-American":
+			self.awayCon = "MAC"
+		elif str(gameObj.away_conference) == "American Athletic":
+			self.awayCon = "AAC"
+		elif str(gameObj.away_conference) == "Mountain West":
+			self.awayCon = "MWC"
+		else:
+			self.awayCon = str(gameObj.away_conference)
 	
 	def setLines(self, linesObj):
 		for item in linesObj:
@@ -66,66 +87,6 @@ class cfbGame:
 		print(self.awayCon + " vs " + self.homeCon)
 		if self.venue is not None:
 			print("Venue: " + self.venue)
-
-	def printLines(self):
-		self.printBasicGameInfo()
-		for line in self.lines:
-			print("Line Provider: " + line.provider)
-			print("Current Spread: " + line.formatted_spread)
-			if line.spread_open > 0:
-				print("Opening Spread: " + self.awayTeam + " -" + str(line.spread_open))
-			elif line.spread_open < 0:
-				print("Opening Spread: " + self.homeTeam + " " + str(line.spread_open))
-			else:
-				print("Opening Spread: Pick 'em")
-			# Do calcs for line movement here too
-			#print("Line movement: " + "\n")
-			if (line.over_under_open is not None) and (line.over_under is not None):
-				print("Current Point Total: " + str(line.over_under))
-				print("Opening Point Total: " + str(line.over_under_open))
-				lineMovement = line.over_under_open - line.over_under
-				#print("Point Total Movement: " + str(lineMovement) + "\n")
-		
-	def printAdvStatsMatchup(self):
-		print("\n{:<20} {:<20} {:<20}".format("Adv Stats", self.homeTeam, self.awayTeam))
-		if (self.homeAdvStats is None) or (self.awayAdvStats is None):
-			print("One or both teams in the given matchup does not have advanced stats data\n")
-			return
-		homeStats = self.homeAdvStats
-		awayStats = self.awayAdvStats
-		# Print adv stats in a table format
-		print("{:<20} {:<20.3f} {:<20.3f}".format("OffScsRt/DefScsRt", homeStats["offense"].success_rate, awayStats["defense"].success_rate))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("DefScsRt/OffScsRt", homeStats["defense"].success_rate, awayStats["offense"].success_rate))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("OffExpl/DefExpl", homeStats["offense"].explosiveness, awayStats["defense"].explosiveness))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("DefExpl/OffExpl", homeStats["defense"].explosiveness, awayStats["offense"].explosiveness))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("OffPwrScs/DefPwrScs", homeStats["offense"].power_success, awayStats["defense"].power_success))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("DefPwrScs/OffPwrScs", homeStats["defense"].power_success, awayStats["offense"].power_success))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("OffStfRt/DefStfRt", homeStats["offense"].stuff_rate, awayStats["defense"].stuff_rate))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("DefStfRt/OffStfRt", homeStats["defense"].stuff_rate, awayStats["offense"].stuff_rate))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("OffPPO/DefPPO", homeStats["offense"].points_per_opportunity, awayStats["defense"].points_per_opportunity))
-		print("{:<20} {:<20.3f} {:<20.3f}\n".format("DefPPO/OffPPO", homeStats["defense"].points_per_opportunity, awayStats["offense"].points_per_opportunity))
-
-	def printEpaMatchup(self):
-		print("\n{:<20} {:<20} {:<20}".format("PPA Stats", self.homeTeam, self.awayTeam))
-		if (self.homeEpa is None) or (self.awayEpa is None):
-			print("One or both teams in the given matchup does epa data\n")
-			return
-		homeEpa = self.homeEpa
-		awayEpa = self.awayEpa
-		print("{:<20} {:<20.3f} {:<20.3f}".format("OffOvr/DefOvr", homeEpa["offense"].overall, awayEpa["defense"].overall))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("DefOvr/OffOvr", homeEpa["defense"].overall, awayEpa["offense"].overall))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("OffPass/DefPass", homeEpa["offense"].passing, awayEpa["defense"].passing))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("DefPass/OffPass", homeEpa["defense"].passing, awayEpa["offense"].passing))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("OffRush/DefRush", homeEpa["offense"].rushing, awayEpa["defense"].rushing))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("DefRush/OffRush", homeEpa["defense"].rushing, awayEpa["offense"].rushing))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("OffRush/DefRush", homeEpa["offense"].rushing, awayEpa["defense"].rushing))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("DefRush/OffRush", homeEpa["defense"].rushing, awayEpa["offense"].rushing))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("Off1stD/Def1stD", homeEpa["offense"].first_down, awayEpa["defense"].first_down))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("Def1stD/Off1stD", homeEpa["defense"].first_down, awayEpa["offense"].first_down))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("Off2ndD/Def2ndD", homeEpa["offense"].second_down, awayEpa["defense"].second_down))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("Def3rdD/Off3rdD", homeEpa["defense"].third_down, awayEpa["offense"].third_down))
-		print("{:<20} {:<20.3f} {:<20.3f}".format("Off3rdD/Def3rdD", homeEpa["offense"].third_down, awayEpa["defense"].third_down))
-		print("{:<20} {:<20.3f} {:<20.3f}\n".format("Def2ndD/Off2ndD", homeEpa["defense"].second_down, awayEpa["offense"].second_down))
 
 	def setMatchupAdvStats(self, advStatsObj):
 		if self.homeTeam in advStatsObj:
@@ -143,13 +104,17 @@ class cfbGame:
 		if self.homeTeam in rankObj:
 			self.homeRank = rankObj[self.homeTeam]
 			self.homeTeamRank = "#" + str(rankObj[self.homeTeam]) + " " + self.homeTeam
+			self.homeAbbrRank = "#" + str(rankObj[self.homeTeam]) + " " + self.homeTeamAbbr
 		else:
 			self.homeTeamRank = self.homeTeam
+			self.homeAbbrRank = self.homeTeamAbbr
 		if self.awayTeam in rankObj:
 			self.awayRank = rankObj[self.awayTeam]
 			self.awayTeamRank = "#" + str(rankObj[self.awayTeam]) + " " + self.awayTeam
+			self.awayAbbrRank = "#" + str(rankObj[self.awayTeam]) + " " + self.awayTeamAbbr
 		else:
 			self.awayTeamRank = self.awayTeam
+			self.awayAbbrRank = self.awayTeamAbbr
 		if (self.homeRank is not None) and (self.awayRank is not None):
 			self.rankOnRank = True
 
@@ -157,12 +122,19 @@ class cfbGame:
 		self.homeLogo = teamObj[self.homeTeam].logos[0]
 		self.awayLogo = teamObj[self.awayTeam].logos[0]
 
-	def createMatchupPreview(self):
-		
+	def setTeamAbbr(self, teamObj):
+		self.homeTeamAbbr = teamObj[self.homeTeam].abbreviation
+		self.awayTeamAbbr = teamObj[self.awayTeam].abbreviation
 
+	def setVenueInfo(self, venObj):
+		for venue in venObj:
+			if venue.name == self.venue:
+				self.location = venue.city + ", " + venue.state
 
-
-		return
+	def setWinProb(self, wpObj):
+		for game in wpObj:
+			if game.game_id == self.gameID:
+				self.homeWinProb = game.home_win_prob
 
 # Get initial time variables
 today = datetime.date.today()
@@ -231,7 +203,25 @@ def getTeamEpa():
 		api_response = api_instance.get_team_ppa(year=year, exclude_garbage_time=True)
 		teamEpa = {}
 		for listTeam in api_response:
-			teamEpa[listTeam.team] = {"offense": listTeam.offense, "defense": listTeam.defense}
+			offObj = listTeam.offense
+			defObj = listTeam.defense
+			teamOffense = {
+				"overall": offObj.overall,
+				"passing": offObj.passing,
+				"rushing": offObj.rushing,
+				"first_down": offObj.first_down,
+				"second_down": offObj.second_down,
+				"third_down": offObj.third_down
+			}
+			teamDefense = {
+				"overall": defObj.overall,
+				"passing": defObj.passing,
+				"rushing": defObj.rushing,
+				"first_down": defObj.first_down,
+				"second_down": defObj.second_down,
+				"third_down": defObj.third_down
+			}
+			teamEpa[listTeam.team] = {"offense": teamOffense, "defense": teamDefense}
 		return teamEpa
 	except ApiException as e:
 		print("Exception when calling MetricsApi->get_team_ppa: %s\n" % e)
@@ -245,11 +235,76 @@ def getTeamAdvStats():
 		api_response = api_instance.get_advanced_team_season_stats(year=year, exclude_garbage_time=True)
 		teamAdvStats = {}
 		for listTeam in api_response:
-			teamAdvStats[listTeam.team] = {"offense": listTeam.offense, "defense": listTeam.defense}
+			offObj = listTeam.offense
+			defObj = listTeam.defense
+			teamOffense = {
+				"plays": offObj.plays,
+				"drives": offObj.drives,
+				"ppa": offObj.ppa,
+				"success_rate": offObj.success_rate,
+				"explosiveness": offObj.explosiveness,
+				"power_success": offObj.power_success,
+				"stuff_rate": offObj.stuff_rate,
+				"line_yards": offObj.line_yards,
+				"second_level_yards": offObj.second_level_yards,
+				"open_field_yards": offObj.open_field_yards,
+				"points_per_opportunity": offObj.points_per_opportunity,
+				"average_fp_start": offObj.field_position.average_start,
+				"average_fp_ppa": offObj.field_position.average_predicted_points,
+				"rushing_success_rate": offObj.rushing_plays.success_rate,
+				"rushing_rate": offObj.rushing_plays.rate,
+				"rushing_explosiveness": offObj.rushing_plays.explosiveness,
+				"passing_success_rate": offObj.passing_plays.success_rate,
+				"passing_rate": offObj.passing_plays.rate,
+				"passing_explosiveness": offObj.passing_plays.explosiveness
+				}
+			teamDefense = {
+				"plays": defObj.plays,
+				"drives": defObj.drives,
+				"ppa": defObj.ppa,
+				"success_rate": defObj.success_rate,
+				"explosiveness": defObj.explosiveness,
+				"power_success": defObj.power_success,
+				"stuff_rate": defObj.stuff_rate,
+				"line_yards": defObj.line_yards,
+				"second_level_yards": defObj.second_level_yards,
+				"open_field_yards": defObj.open_field_yards,
+				"points_per_opportunity": defObj.points_per_opportunity,
+				"average_fp_start": defObj.field_position.average_start,
+				"average_fp_ppa": defObj.field_position.average_predicted_points,
+				"rushing_success_rate": defObj.rushing_plays.success_rate,
+				"passing_success_rate": defObj.passing_plays.success_rate,
+				"rushing_explosiveness": defObj.rushing_plays.explosiveness,
+				"passing_explosiveness": defObj.passing_plays.explosiveness,
+				"havoc_total": defObj.havoc.total,
+				"havoc_front_seven": defObj.havoc.front_seven,
+				"havoc_db": defObj.havoc.db
+				}
+			teamAdvStats[listTeam.team] = {"offense": teamOffense, "defense": teamDefense}
 		return teamAdvStats
 	except ApiException as e:
 		print("Exception when calling StatsApi->get_advanced_team_season_stats: %s\n" % e)
 		return 0
+
+# Get team stats both epa and adv stats in one object list
+def getTeamStats():
+	teamEpa = getTeamEpa()
+	teamAdvStats = getTeamAdvStats()
+	teams = getFBSTeams()
+	teamStatsDict = {}
+	for team in teams:
+		if team in teamEpa:
+			epaDict = teamEpa[team]
+		else:
+			epaDict = {"offense": "None", "defense": "None"}
+		if team in teamAdvStats:
+			advStatsDict = teamAdvStats[team]
+		else:
+			advStatsDict = None
+		# Possibly add ability to have epa stats added to teamStatsDict
+		teamStatsDict[team] = {"epa": epaDict, "advStats": advStatsDict}
+
+	return teamStatsDict
 
 def getTeams():
 	# create an instance of the API class
@@ -262,6 +317,40 @@ def getTeams():
 		return teamDict
 	except ApiException as e:
 		print("Exception when calling TeamsApi->get_teams: %s\n" % e)
+		return 0
+	
+def getFBSTeams():
+	# create an instance of the API class
+	api_instance = cfbd.TeamsApi(cfbd.ApiClient(configuration))
+	try:
+		api_response = api_instance.get_fbs_teams()
+		teamDict = {}
+		for team in api_response:
+			teamDict[team.school] = team
+		return teamDict
+	except ApiException as e:
+		print("Exception when calling TeamsApi->get_fbs_teams: %s\n" % e)
+		return 0
+	
+def getVenueInfo():
+	# create an instance of the API class
+	api_instance = cfbd.VenuesApi(cfbd.ApiClient(configuration))
+	try:
+		api_response = api_instance.get_venues()
+		return api_response
+	except ApiException as e:
+		print("Exception when calling VenuesApi->get_venues: %s\n" % e)
+		return 0
+	
+def getPregameWinProb(weekNum):
+	# create an instance of the API class
+	season_type = 'regular'
+	api_instance = cfbd.MetricsApi(cfbd.ApiClient(configuration))
+	try:
+		api_response = api_instance.get_pregame_win_probabilities(year=year, week=weekNum, season_type=season_type)
+		return api_response
+	except ApiException as e:
+		print("Exception when calling MetricsApi->get_pregame_win_probabilities: %s\n" % e)
 		return 0
 
 # Get calendar to know what week it is
@@ -338,19 +427,24 @@ def orderGamesList(gamesList):
 # Aggregate matchup information into list of week games and order them
 def matchupListAggregator(weekNum):
 	allTeams = getTeams()
+	allVenues = getVenueInfo()
 	rankingsList = getTeamRankingsAP(weekNum)
 	weekGamesList = getWeekGames(weekNum)
 	weekGamesLines = getWeekLines(weekNum)
 	teamEpaList = getTeamEpa()
 	teamAdvStatsList = getTeamAdvStats()
+	weekGamesPreWinProb = getPregameWinProb(weekNum)
 
 	weekGames = []
 	for game in weekGamesList:
 		weekGame = cfbGame(game)
 		weekGame.setLogoLinks(allTeams)
+		weekGame.setTeamAbbr(allTeams)
 		weekGame.setMatchupEpa(teamEpaList)
 		weekGame.setMatchupAdvStats(teamAdvStatsList)
 		weekGame.setMatchupRanks(rankingsList)
+		weekGame.setVenueInfo(allVenues)
+		weekGame.setWinProb(weekGamesPreWinProb)
 		for lineGame in weekGamesLines:
 			if weekGame.gameID == lineGame.id:
 				weekGame.setLines(lineGame.lines)

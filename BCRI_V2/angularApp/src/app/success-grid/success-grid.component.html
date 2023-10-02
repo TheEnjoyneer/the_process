@@ -1,0 +1,76 @@
+
+<div *ngIf="teamSel == '1'" class="leftTable">
+    <table>
+        <caption>Success Rates</caption>
+        <tr>
+            <th class="leftTDlabs">Offense</th>
+            <td class="leftTDvals" [style]="{'background-color': this.colors.offSR}">{{textStats.offSR}}%</td>
+        </tr>
+        <tr>
+            <td class="leftTDlabs">Pass</td>
+            <td class="leftTDvals" [style]="{'background-color': this.colors.offPassSR}">{{textStats.offPassSR}}%</td>
+        </tr>
+        <tr>
+            <td class="leftTDlabs">Rush</td>
+            <td class="leftTDvals" [style]="{'background-color': this.colors.offRushSR}">{{textStats.offRushSR}}%</td>
+        </tr>
+        <tr>
+            <td class="leftTDlabs">Power</td>
+            <td class="leftTDvals" [style]="{'background-color': this.colors.offPwrSR}">{{textStats.offPwrSR}}%</td>
+        </tr>
+        <tr>
+            <th class="leftTDlabs">Defense</th>
+            <td class="leftTDvals" [style]="{'background-color': this.colors.defSR}">{{textStats.defSR}}%</td>
+        </tr>
+        <tr>
+            <td class="leftTDlabs">Pass</td>
+            <td class="leftTDvals" [style]="{'background-color': this.colors.defPassSR}">{{textStats.defPassSR}}%</td>
+        </tr>
+        <tr>
+            <td class="leftTDlabs">Rush</td>
+            <td class="leftTDvals" [style]="{'background-color': this.colors.defRushSR}">{{textStats.defRushSR}}%</td>
+        </tr>
+        <tr>
+            <td class="leftTDlabs">Power</td>
+            <td class="leftTDvals" [style]="{'background-color': this.colors.defPwrSR}">{{textStats.defPwrSR}}%</td>
+        </tr>
+    </table>
+</div>
+
+<div *ngIf="teamSel == '2'" class="rightTable">
+    <table>
+        <caption>Success Rates</caption>
+        <tr>
+            <td class="rightTDvals" [style]="{'background-color': this.colors.offSR}">{{textStats.offSR}}%</td>
+            <th class="rightTDlabs">Offense</th>
+        </tr>
+        <tr>
+            <td class="rightTDvals" [style]="{'background-color': this.colors.offPassSR}">{{textStats.offPassSR}}%</td>
+            <td class="rightTDlabs">Pass</td>
+        </tr>
+        <tr>
+            <td class="rightTDvals" [style]="{'background-color': this.colors.offRushSR}">{{textStats.offRushSR}}%</td>
+            <td class="rightTDlabs">Rush</td>
+        </tr>
+        <tr>
+            <td class="rightTDvals" [style]="{'background-color': this.colors.offPwrSR}">{{textStats.offPwrSR}}%</td>
+            <td class="rightTDlabs">Power</td>
+        </tr>
+        <tr>
+            <td class="rightTDvals" [style]="{'background-color': this.colors.defSR}">{{textStats.defSR}}%</td>
+            <th class="rightTDlabs">Defense</th>
+        </tr>
+        <tr>
+            <td class="rightTDvals" [style]="{'background-color': this.colors.defPassSR}">{{textStats.defPassSR}}%</td>
+            <td class="rightTDlabs">Pass</td>
+        </tr>
+        <tr>
+            <td class="rightTDvals" [style]="{'background-color': this.colors.defRushSR}">{{textStats.defRushSR}}%</td>
+            <td class="rightTDlabs">Rush</td>
+        </tr>
+        <tr>
+            <td class="rightTDvals" [style]="{'background-color': this.colors.defPwrSR}">{{textStats.defPwrSR}}%</td>
+            <td class="rightTDlabs">Power</td>
+        </tr>
+    </table>
+</div>

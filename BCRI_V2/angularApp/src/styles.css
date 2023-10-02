@@ -12,6 +12,22 @@ body {
   --secondary-color: #8B89E6;
   --accent-color: #e8e7fa;
   --shadow-color: #E8E8E8;
+  --layer0: #1e1e1e;
+  --layer1: #252526;
+  --layer2: #2d2d30;
+  --layer3: #3e3e42;
+  --layer4: #4a4a4f;
+  --layer5: #57575c;
+  --text-color: white;
+  --threshold0: #f7020e;
+  --threshold1: #fd434c;
+  --threshold2: #fd8a90;
+  --threshold3: #dadbdd;
+  --threshold4: #89ff97;
+  --threshold5: #42ff57;
+  --threshold6: #00f91c; 
+  --offWhiteText: #F8F0E3;
+  --condFormText: #3d3d3d
 }
 
 button.primary {
@@ -21,3 +37,6 @@ button.primary {
   color: white;
   border-radius: 8px;
 }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

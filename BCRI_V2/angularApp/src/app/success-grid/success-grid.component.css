@@ -1,0 +1,35 @@
+th {
+  padding: 0 5px;
+}
+
+td {
+  padding: 0 5px;
+}
+
+.leftTDvals {
+  text-align:left;
+  color: var(--condFormText);
+}
+
+.leftTDlabs {
+  text-align: right;
+}
+
+.rightTDvals {
+  text-align:right;
+  color: var(--condFormText);
+}
+
+.rightTDlabs {
+  text-align: left;
+}
+
+.leftTable {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.rightTable {
+  width: 100%;
+  overflow-x: auto;
+}

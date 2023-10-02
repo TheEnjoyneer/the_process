@@ -1,0 +1,59 @@
+<div class="bettingContainer">
+    <div id="mobileContent">
+        <table class="custom-table">
+            <tr>
+                <th></th>
+                <th>Open</th>
+                <th>Current</th>
+                <th></th>
+            </tr>
+            <tr>
+                <th>ATS</th>
+                <td>{{game?.openSpread}}</td>
+                <td>{{game?.currSpread}}</td>
+                <td class="with-icon"><button mat-mini-fab><mat-icon>lock_open</mat-icon></button></td>
+            </tr>
+            <tr>
+                <th>O/U</th>
+                <td>{{game?.openTotal}}</td>
+                <td>{{game?.currTotal}}</td>
+                <td class="with-icon"><button mat-mini-fab><mat-icon>lock_open</mat-icon></button></td>
+            </tr>
+            <tr>
+                <th>ML</th>
+                <td>N/A</td>
+                <td>{{game?.moneyline}}</td>
+                <td class="with-icon"><button mat-mini-fab><mat-icon>lock_open</mat-icon></button></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="largeContent">
+        <table class="custom-table">
+            <tr>
+                <th></th>
+                <th>Open</th>
+                <th>Current</th>
+                <th></th>
+            </tr>
+            <tr>
+                <th>Spread</th>
+                <td>{{game?.openSpread}}</td>
+                <td>{{game?.currSpread}}</td>
+                <td class="with-icon"><button mat-mini-fab><mat-icon>lock_open</mat-icon></button></td>
+            </tr>
+            <tr>
+                <th>Over/Under</th>
+                <td>{{game?.openTotal}}</td>
+                <td>{{game?.currTotal}}</td>
+                <td class="with-icon"><button mat-mini-fab><mat-icon>lock_open</mat-icon></button></td>
+            </tr>
+            <tr>
+                <th>Moneyline</th>
+                <td>N/A</td>
+                <td>{{game?.moneyline}}</td>
+                <td class="with-icon"><button mat-mini-fab><mat-icon>lock_open</mat-icon></button></td>
+            </tr>
+        </table>
+    </div>
+</div>

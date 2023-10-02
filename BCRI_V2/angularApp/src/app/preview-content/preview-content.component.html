@@ -1,0 +1,162 @@
+<div id="mobileContent">
+    <mat-grid-list cols="12" rowHeight="40px">
+        <mat-grid-tile
+            colspan="6"
+            rowspan="3">
+            <app-logo-grid [gameID]="gameID" teamSel="1"></app-logo-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="6"
+            rowspan="3">
+            <app-logo-grid [gameID]="gameID" teamSel="2"></app-logo-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="3"
+            rowspan="3">
+            <div style="text-align: center">
+                <p>Pregame</p>
+                <p>Win Prob</p>
+                <p>{{this.awayWP}}%</p>
+            </div>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="6"
+            rowspan="3">
+            <app-info-grid [gameID]="gameID"></app-info-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="3"
+            rowspan="3">
+            <div style="text-align: center">
+                <p>Pregame</p>
+                <p>Win Prob</p>
+                <p>{{this.homeWP}}%</p>
+            </div>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="12"
+            rowspan="1">
+            <div style="text-align: center">
+                <p>Lines Provider: {{game?.provider}}</p>
+            </div>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="6"
+            rowspan="6">
+            <app-explosive-grid [gameID]="gameID" teamSel="1"></app-explosive-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="6"
+            rowspan="6">
+            <app-explosive-grid [gameID]="gameID" teamSel="2"></app-explosive-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="6"
+            rowspan="6">
+            <app-success-grid [gameID]="gameID" teamSel="1"></app-success-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="6"
+            rowspan="6">
+            <app-success-grid [gameID]="gameID" teamSel="2"></app-success-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="12"
+            rowspan="6">
+            <app-matchup-grid [gameID]="gameID" titleDir="1"></app-matchup-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="12"
+            rowspan="6">
+            <app-matchup-grid [gameID]="gameID" titleDir="2"></app-matchup-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="12"
+            rowspan="4">
+            <app-betting-grid [gameID]="gameID"></app-betting-grid>
+        </mat-grid-tile>
+    </mat-grid-list>
+</div>
+
+<div id="largeContent">
+    <mat-grid-list cols="11" rowHeight="40px">
+        <mat-grid-tile
+            colspan="4"
+            rowspan="4"
+            class="logo-grid">
+            <app-logo-grid  [gameID]="gameID" teamSel="1"></app-logo-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="3"
+            rowspan="4"
+            class="logo-grid">
+            <app-info-grid [gameID]="gameID"></app-info-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="4"
+            rowspan="4"
+            class="logo-grid">
+            <app-logo-grid [gameID]="gameID" teamSel="2"></app-logo-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="4"
+            rowspan="1"
+            class="wp-grid">
+            <div style="text-align: center">
+                <p>Pregame Win Prob: {{this.awayWP}}%</p>
+            </div>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="3"
+            rowspan="1"
+            style="border-bottom: 0px;">
+            <div style="text-align: center">
+                <p>Lines Provider:</p>
+                <p>{{game?.provider}}</p>
+            </div>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="4"
+            rowspan="1"
+            class="wp-grid">
+            <div style="text-align: center">
+                <p>Pregame Win Prob: {{this.homeWP}}%</p>
+            </div>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="3"
+            rowspan="6">
+            <app-explosive-grid [gameID]="gameID" teamSel="1"></app-explosive-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="5"
+            rowspan="6">
+            <app-matchup-grid [gameID]="gameID" titleDir="1"></app-matchup-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="3"
+            rowspan="6">
+            <app-explosive-grid [gameID]="gameID" teamSel="2"></app-explosive-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="3"
+            rowspan="6">
+            <app-success-grid [gameID]="gameID" teamSel="1"></app-success-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="5"
+            rowspan="6">
+            <app-matchup-grid [gameID]="gameID" titleDir="2"></app-matchup-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="3"
+            rowspan="6">
+            <app-success-grid [gameID]="gameID" teamSel="2"></app-success-grid>
+        </mat-grid-tile>
+        <mat-grid-tile
+            colspan="11"
+            rowspan="4">
+            <app-betting-grid [gameID]="gameID"></app-betting-grid>
+        </mat-grid-tile>
+    </mat-grid-list>
+  </div>

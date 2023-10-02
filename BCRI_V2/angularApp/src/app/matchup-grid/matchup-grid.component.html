@@ -1,0 +1,47 @@
+
+<table>
+    <!---<caption>{{this.leftCol}} vs {{this.rightCol}}</caption>--->
+    <caption>Matchup Stats</caption>
+    <tr>
+        <th>{{this.leftCol}}</th>
+        <th></th>
+        <th>{{this.rightCol}}</th>
+    </tr>
+    
+    <tr>
+        <td [style]="{'background-color': this.colors.left_epa}">{{textStats.leftPPA}}</td>
+        <th>EPA</th>
+        <td [style]="{'background-color': this.colors.right_epa}">{{textStats.rightPPA}}</td>
+    </tr>
+    <tr>
+        <td [style]="{'background-color': this.colors.left_ppo}">{{textStats.leftPPO}}</td>
+        <th>PPO</th>
+        <td [style]="{'background-color': this.colors.right_ppo}">{{textStats.rightPPO}}</td>
+    </tr>
+    <tr>
+        <td [style]="{'background-color': this.colors.left_avg_fp}">{{textStats.leftFpStart}}</td>
+        <th>Avg FP Start</th>
+        <td [style]="{'background-color': this.colors.right_avg_fp}">{{textStats.rightFpStart}}</td>
+    </tr>
+    <tr>
+        <td [style]="{'background-color': this.colors.left_line_yards}">{{textStats.leftLineYds}}</td>
+        <th>Line Yards</th>
+        <td [style]="{'background-color': this.colors.right_line_yards}">{{textStats.rightLineYds}}</td>
+    </tr>
+    <tr>
+        <td [style]="{'background-color': this.colors.left_second_level}">{{textStats.leftSecLvlYds}}</td>
+        <th>2nd Level Yards</th>
+        <td [style]="{'background-color': this.colors.right_second_level}">{{textStats.rightSecLvlYds}}</td>
+    </tr>
+    <tr>
+        <td [style]="{'background-color': this.colors.left_open_field}">{{textStats.leftOpenFldYds}}</td>
+        <th>Open Field Yards</th>
+        <td [style]="{'background-color': this.colors.right_open_field}">{{textStats.rightOpenFldYds}}</td>
+    </tr>
+    <tr>
+        <td [style]="{'background-color': this.colors.left_stuff}">{{textStats.leftStuff}}</td>
+        <th>Stuff Rate</th>
+        <td [style]="{'background-color': this.colors.right_stuff}">{{textStats.rightStuff}}</td>
+    </tr>
+</table>
+

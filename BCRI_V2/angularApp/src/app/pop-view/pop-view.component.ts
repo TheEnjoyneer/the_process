@@ -3,7 +3,6 @@ import { PopViewService } from '../_services';
 
 @Component({
   selector: 'app-pop-view',
-  standalone: true,
   templateUrl: './pop-view.component.html',
   styleUrls: ['./pop-view.component.css'],
   encapsulation: ViewEncapsulation.None

@@ -1,23 +1,29 @@
-<div *ngFor="let game of newdata">
-   <mat-card class="example-card">
-    <mat-card-content>
-        <p>{{game?.matchup}}</p>
-        <p>{{game?.conferences}}</p>
-        <p>Venue: {{game?.venue}}</p>
-        <p>Line Provider: {{game?.provider}}</p>
-        <p>Current Spread: {{game?.currSpread}}</p>
-        <p>Opening Spread: {{game?.openSpread}}</p>
-        <p>Current Total: {{game?.currTotal}}</p>
-        <p>Opening Total: {{game?.openTotal}}</p>
-        <p>Home Moneyline: {{game?.moneyline}}</p>
-        <mat-card-actions class="example-action">
-            <button mat-button (click)="popviewService.open(game?.gameID)">FULL PREVIEW</button>
-        </mat-card-actions>
-    </mat-card-content>
-  </mat-card>
-  <app-pop-view [id]='game?.gameID'>
-    <h1>A Game Preview Pop Up</h1>
-    <p style="padding-bottom: 500px;">Close with the button below or by clicking the background.</p>
-    <button (click)="popviewService.close()">Close</button>
-    </app-pop-view>
+<div class="cardBack" *ngIf="gameData" style="display:flex;">
+  <div fxLayout="row wrap" fxLayoutGap="10px grid" fxLayoutAlign="flex-start" class="cardList">
+    <div fxFlex fxFlex.xs="100%" *ngFor="let game of gameData">
+      <mat-card class="cardListItem mat-elevation-z8">
+        <mat-card-content>
+            <p>{{game?.awayAbbrRank}} at {{game?.homeAbbrRank}}</p>
+            <p>{{game?.conferences}}</p>
+            <p>{{game?.startDate}}</p>
+            <p>{{game?.startTime}}</p>
+            <p>ATS: {{game?.currSpread}}</p>
+            <p>O/U: {{game?.currTotal}}</p>
+            <p>ML: {{game?.moneyline}}</p>
+            <mat-card-actions class="example-action">
+              <button mat-raised-button color="customColor" (click)="popviewService.open(game?.gameID)">FULL PREVIEW</button>
+            </mat-card-actions>
+            <app-pop-view [id]='game?.gameID'>
+              <h1 style="text-align: center;">{{game?.awayTeamRank}} vs {{game?.homeTeamRank}}</h1>
+              <app-preview-content [gameID]="game?.gameID" style="background-color: var(--layer3)"></app-preview-content>
+                <div class="container">
+                  <div class="center">
+                    <button mat-raised-button color="closeColor" (click)="popviewService.close()">Close</button>
+                  </div>
+                </div>
+            </app-pop-view>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
 </div>

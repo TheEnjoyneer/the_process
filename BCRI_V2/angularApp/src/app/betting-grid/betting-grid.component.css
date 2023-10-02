@@ -1,0 +1,19 @@
+.custom-table td {
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
+}
+
+.bettingContainer {
+  margin: auto;
+}
+
+@media screen and (min-width: 0px) and (max-width: 700px) {
+    #mobileContent { display: block; }  /* show it on small screens */
+    #largeContent { display: none; }
+  }
+  
+  @media screen and (min-width: 701px) {
+    #mobileContent { display: none; }   /* hide it elsewhere */
+    #largeContent { display: block; }
+  }

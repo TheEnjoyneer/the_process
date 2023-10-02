@@ -1,1 +1,0 @@
-{"ast":null,"code":"export * from './pop-view.service';","map":{"version":3,"names":[],"sources":["C:\\Users\\Christopher Brant\\CFB_BCRI\\the_process\\BCRI_V2\\angularApp\\src\\app\\_services\\index.ts"],"sourcesContent":["export * from './pop-view.service';"],"mappings":"AAAA,cAAc,oBAAoB"},"metadata":{},"sourceType":"module","externalDependencies":[]}

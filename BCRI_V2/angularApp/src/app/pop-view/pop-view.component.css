@@ -17,11 +17,19 @@ app-pop-view {
 
         /* enables scrolling for tall modals */
         overflow: auto;
+
+        color: var(--text-color);
+
+        min-width:350px;
+        
+        /*
+        border-radius: 25px !important;
+        */
     }
 
     .app-pop-view-body {
         padding: 20px;
-        background: #fff;
+        background: var(--layer3);
     }
 }
 
