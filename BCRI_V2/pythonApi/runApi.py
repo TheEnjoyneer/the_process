@@ -1,28 +1,14 @@
 # Christopher Brant
 # Fall 2023 
-# runTest.py
-# testing functions and scripting for dataImport.py
+# runApi.py
 import dataImport as di
-import sys
-#import getopt
-#import argparse
 import threading
 import pytz
 from datetime import datetime
 from flask import Flask, jsonify, request
 from flask_cors import CORS, cross_origin
-from markupsafe import escape
 	
 app = Flask(__name__)
-
-# Return total number of games for this week
-@app.route("/numGames")
-@cross_origin(supports_credentials=True)
-def getNumGames():
-	data = {
-		'numGames': len(currWeekGamesOrdered)
-	}
-	return jsonify(data)
 
 @app.route("/currGames")
 @cross_origin(supports_credentials=True)
@@ -163,7 +149,6 @@ def reloadApiData():
 		teamStatsList.append({"team": key, "stats": teamStatsDict[key]})
 	currWeekGamesOrdered = di.matchupListAggregator(currWeek)
 	threading.Timer(86400, loadApiData).start()
-	# threading.Timer(5, reloadApiData).start()
 
 def runApiApp():
 	app.run(host="0.0.0.0", port=5000)
