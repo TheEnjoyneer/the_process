@@ -5,17 +5,10 @@ import dataImport as di
 import threading
 import pytz
 from datetime import datetime
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, redirect
 from flask_cors import CORS, cross_origin
 	
 app = Flask(__name__)
-
-@app.before_request
-def before_request():
-	if not request.is_secure:
-		url = request.url.replace('http://', 'https://', 1)
-		code = 301
-		return redirect(url, code=code)
 
 @app.route("/currGames")
 @cross_origin(supports_credentials=True)
