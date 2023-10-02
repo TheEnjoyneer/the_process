@@ -7,8 +7,8 @@ import { teamStatsDict, teamStatsList, teamStatsSplit, offenseStats, defenseStat
   providedIn: 'root',
 })
 export class FlaskDataService {
-  requestStrBase: string = "http://127.0.0.1:5000/";
-  //requestStrBase: string = "http://98.180.111.57:5000/";
+  //requestStrBase: string = "http://127.0.0.1:5000/";
+  requestStrBase: string = "https://98.180.111.57:5000/";
   requestStrGames: string = ""
   requestStr: string = "";
   teamStats!: any;
