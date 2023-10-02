@@ -10,6 +10,13 @@ from flask_cors import CORS, cross_origin
 	
 app = Flask(__name__)
 
+@app.before_request
+def before_request():
+	if not request.is_secure:
+		url = request.url.replace('http://', 'https://', 1)
+		code = 301
+		return redirect(url, code=code)
+
 @app.route("/currGames")
 @cross_origin(supports_credentials=True)
 def getGameCards():
@@ -151,7 +158,7 @@ def reloadApiData():
 	threading.Timer(86400, loadApiData).start()
 
 def runApiApp():
-	app.run(host="0.0.0.0", port=5000)
+	app.run(host="0.0.0.0", port=5000, ssl_context=('cert.pem', 'key.pem'))
 
 if __name__ == '__main__':
 	loadApiData()
