@@ -8,6 +8,10 @@
   margin: auto;
 }
 
+.mat-lockColor{
+  background-color: var(--layer5) !important;
+}
+
 @media screen and (min-width: 0px) and (max-width: 700px) {
     #mobileContent { display: block; }  /* show it on small screens */
     #largeContent { display: none; }

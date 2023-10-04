@@ -1,0 +1,25 @@
+<mat-card class="cardListItem mat-elevation-z8" style="background: url({{homeLogo}}) right no-repeat, url({{awayLogo}}) left no-repeat; background-size: 50% auto; background-color: var(--layer2);"><!-- style="--home-logo: homeLogo; --away-logo: awayLogo">--->
+    <mat-card-content>
+        <div class="cardListText">
+        <p>{{game?.awayAbbrRank}} at {{game?.homeAbbrRank}}</p>
+        <p>{{game?.conferences}}</p>
+        <p>{{game?.startDate}}</p>
+        <p>{{game?.startTime}}</p>
+        <p>ATS: {{game?.currSpread}}</p>
+        <p>O/U: {{game?.currTotal}}</p>
+        <p>ML: {{game?.moneyline}}</p>
+        </div>
+        <mat-card-actions class="example-action">
+          <button mat-raised-button color="customColor" (click)="popviewService.open(game?.gameID)">FULL PREVIEW</button>
+        </mat-card-actions>
+        <app-pop-view [id]='game?.gameID'>
+          <h1 style="text-align: center;">{{game?.awayTeamRank}} vs {{game?.homeTeamRank}}</h1>
+          <app-preview-content [gameID]="game?.gameID" style="background-color: var(--layer3)"></app-preview-content>
+            <div class="container">
+              <div class="center">
+                <button mat-raised-button color="closeColor" (click)="popviewService.close()">Close</button>
+              </div>
+            </div>
+        </app-pop-view>
+    </mat-card-content>
+  </mat-card>

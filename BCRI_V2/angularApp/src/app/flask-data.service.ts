@@ -100,7 +100,7 @@ export class FlaskDataService {
     let splitStrArr = unitType.split("_");
     let splitStr = splitStrArr[0];
     
-    if ((unitType == "fp_start" && splitStr == "defense") || splitStr == "offense" || splitStr == "havoc")
+    if ((statType == "fp_start" && splitStr == "defense") || (statType == "stuff_rate" && splitStr == "defense"))
     {
       if (statVal < thresholdObj.neg2Dev)
       {
@@ -131,7 +131,7 @@ export class FlaskDataService {
         retColor = "var(--threshold6)";
       }
     }
-    else if ((unitType == "fp_start" && splitStr == "offense") || splitStr == "defense")
+    else if ((statType == "fp_start" && splitStr == "offense") || (statType == "stuff_rate" && splitStr == "offense"))
     {
       if (statVal < thresholdObj.neg2Dev)
       {
@@ -162,7 +162,69 @@ export class FlaskDataService {
         retColor = "var(--threshold0)";
       }
     }
-    
+    else if (splitStr == "offense" || splitStr == "havoc")
+    {
+      if (statVal < thresholdObj.neg2Dev)
+      {
+        retColor = "var(--threshold0)";
+      }
+      else if ((statVal > thresholdObj.neg2Dev) && (statVal < thresholdObj.neg1Dev))
+      {
+        retColor = "var(--threshold1)";
+      }
+      else if ((statVal > thresholdObj.neg1Dev) && (statVal < thresholdObj.negQrtDev))
+      {
+        retColor = "var(--threshold2)";
+      }
+      else if ((statVal > thresholdObj.negQrtDev) && (statVal < thresholdObj.posQrtDev))
+      {
+        retColor = "var(--threshold3)";
+      }
+      else if ((statVal > thresholdObj.posQrtDev) && (statVal < thresholdObj.pos1Dev))
+      {
+        retColor = "var(--threshold4)";
+      }
+      else if ((statVal > thresholdObj.pos1Dev) && (statVal < thresholdObj.pos2Dev))
+      {
+        retColor = "var(--threshold5)";
+      }
+      else if (statVal > thresholdObj.pos2Dev)
+      {
+        retColor = "var(--threshold6)";
+      }
+    }
+    else if (splitStr == "defense")
+    {
+      if (statVal < thresholdObj.neg2Dev)
+      {
+        retColor = "var(--threshold6)";
+      }
+      else if ((statVal > thresholdObj.neg2Dev) && (statVal < thresholdObj.neg1Dev))
+      {
+        retColor = "var(--threshold5)";
+      }
+      else if ((statVal > thresholdObj.neg1Dev) && (statVal < thresholdObj.negQrtDev))
+      {
+        retColor = "var(--threshold4)";
+      }
+      else if ((statVal > thresholdObj.negQrtDev) && (statVal < thresholdObj.posQrtDev))
+      {
+        retColor = "var(--threshold3)";
+      }
+      else if ((statVal > thresholdObj.posQrtDev) && (statVal < thresholdObj.pos1Dev))
+      {
+        retColor = "var(--threshold2)";
+      }
+      else if ((statVal > thresholdObj.pos1Dev) && (statVal < thresholdObj.pos2Dev))
+      {
+        retColor = "var(--threshold1)";
+      }
+      else if (statVal > thresholdObj.pos2Dev)
+      {
+        retColor = "var(--threshold0)";
+      }
+    }
+  
 
     return retColor;
   }

@@ -162,6 +162,7 @@ def reloadApiData():
 	global teamStatsList
 	global currDate
 	global currWeek
+	teamStatsList = []
 	currDate = datetime.now()
 	currWeek = di.getCurrWeek()
 	teamStatsDict = di.getTeamAdvStats()

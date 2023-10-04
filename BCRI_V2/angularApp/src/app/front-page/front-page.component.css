@@ -8,9 +8,13 @@
     flex: 1 1 auto;
   }
 
+  .fill-remaining-space {
+    flex: 1 1 auto;
+  }
+
   .mat-toolbar {
     background-color: var(--layer1);
-    color: white;
+    color: var(--offWhiteText);
   }
 
   .mat-closeColor{

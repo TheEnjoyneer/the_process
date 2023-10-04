@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { FlaskDataService } from '../flask-data.service';
 
 @Component({
@@ -11,7 +12,7 @@ export class BettingGridComponent implements OnInit {
   gamesList!: any;
   game!: any;
 
-  constructor(private fds: FlaskDataService) { }
+  constructor(private fds: FlaskDataService, public dialog: MatDialog) { }
 
   ngOnInit() {
     this.gamesList = this.fds.getGames();
@@ -24,4 +25,22 @@ export class BettingGridComponent implements OnInit {
       }
     }
   }
+/*
+  openDialog(enterAnimationDuration: string, exitAnimationDuration: string): void {
+    this.dialog.open(DialogLock, {
+      width: '250px',
+      enterAnimationDuration,
+      exitAnimationDuration,
+    })
+  }
+*/
 }
+/*
+@Component({
+  selector: 'dialog-lock',
+  templateUrl: './dialog.html'
+})
+export class DialogLock {
+  constructor(public dialogRef: MatDialogRef<DialogLock>) {}
+}
+*/

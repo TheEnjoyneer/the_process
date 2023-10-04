@@ -1,0 +1,83 @@
+
+// Custom Theming for Angular Material
+// For more information: https://material.angular.io/guide/theming
+@use '@angular/material' as mat;
+@import '@angular/material/theming';
+// Plus imports for other components in your app.
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat.core();
+
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$app-primary: mat.define-palette(mat.$indigo-palette);
+$app-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+$app-warn: mat.define-palette(mat.$red-palette);
+
+// Create the theme object. A theme consists of configurations for individual
+// theming systems such as "color" or "typography".
+$app-theme: mat.define-dark-theme((
+  color: (
+    primary: $app-primary,
+    accent: $app-accent,
+    warn: $app-warn,
+  )
+));
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include mat.all-component-themes($app-theme);
+
+/* You can add global styles to this file, and also import other style files */
+/*@import 'src/custom-theme.scss';*/
+
+//@use '@angular/material' as mat;
+
+//$custom-typography: mat-typography-config($font-family: '"Oswald", sans-serif;');
+//@include mat.core($custom-typography);
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/*body {
+  font-family: 'Be Vietnam Pro', sans-serif;
+}*/
+:root {
+  --primary-color: #605DC8;
+  --secondary-color: #8B89E6;
+  --accent-color: #e8e7fa;
+  --shadow-color: #E8E8E8;
+  --layer0: #1e1e1e;
+  --layer1: #252526;
+  --layer2: #2d2d30;
+  --layer3: #3e3e42;
+  --layer4: #4a4a4f;
+  --layer5: #57575c;
+  --text-color: #F8F0E3;
+  --threshold0: #f7020e;
+  --threshold1: #fd434c;
+  --threshold2: #fd8a90;
+  --threshold3: #dadbdd;
+  --threshold4: #89ff97;
+  --threshold5: #42ff57;
+  --threshold6: #00f91c; 
+  --offWhiteText: #F8F0E3;
+  --condFormText: #3d3d3d;
+}
+
+button.primary {
+  padding: 10px;
+  border: solid 1px var(--primary-color);
+  background: var(--primary-color);
+  color: white;
+  border-radius: 8px;
+}
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

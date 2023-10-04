@@ -1,15 +1,32 @@
 <div class="fullBack">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
   <mat-toolbar>
-      <button mat-icon-button class="example-icon" (click)="popviewService.open('glossary')">
-        <mat-icon>sports_football</mat-icon>
+    <button mat-icon-button [matMenuTriggerFor]="menu">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item>
+        <mat-icon>home</mat-icon>
+        <span>Home</span>
       </button>
-      <span>College Football Betting Previews</span>
-      <span class="example-spacer"></span>
-    </mat-toolbar>
-  <body>
-      <app-matchup-card></app-matchup-card>
-  </body>
+      <button mat-menu-item>
+        <mat-icon>history</mat-icon>
+        <span>Postgame Recaps</span>
+      </button>
+      <button mat-menu-item>
+        <mat-icon>lock</mat-icon>
+        <span>Fantasy Betting</span>
+      </button>
+      <button mat-menu-item (click)="popviewService.open('glossary')">
+        <mat-icon>sports_football</mat-icon>
+        <span>Stats Glossary</span>
+      </button>
+    </mat-menu>
+    <span class="fill-remaining-space">College Football Adv Stat Previews</span>
+  </mat-toolbar>
+  <div>
+    <app-matchup-card></app-matchup-card>
+  </div>
   <div>
     <app-pop-view id='glossary'>
       <h1 style="text-align: center;">Stats Glossary</h1>
