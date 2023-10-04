@@ -69,6 +69,8 @@ export interface game {
     awayAbbr: string;
     homeAbbrRank: string;
     awayAbbrRank: string;
+    homeRecord: string;
+    awayRecord: string;
     conferences: string;
     venue: string;
     location: string;

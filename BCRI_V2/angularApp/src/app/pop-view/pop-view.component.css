@@ -20,7 +20,7 @@ app-pop-view {
 
         color: var(--text-color);
 
-        min-width:350px;
+        min-width:325px;
         
         /*
         border-radius: 25px !important;

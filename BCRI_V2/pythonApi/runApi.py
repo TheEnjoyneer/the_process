@@ -87,6 +87,8 @@ def getGameCards():
 			'awayAbbr': game.awayTeamAbbr,
 			'homeAbbrRank': game.homeAbbrRank,
 			'awayAbbrRank': game.awayAbbrRank,
+			'homeRecord': game.homeTeamRecordTotal,
+			'awayRecord': game.awayTeamRecordTotal,
 			'conferences': confStr,
 			'venue': game.venue,
 			'location': game.location,

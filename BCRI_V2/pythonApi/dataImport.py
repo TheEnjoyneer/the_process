@@ -38,6 +38,14 @@ class cfbGame:
 		self.awayLogo = None
 		self.homePostWinProb = None
 		self.awayPostWinProb = None
+		self.homeTeamRecordTotal = None
+		self.homeTeamRecordConf = None
+		self.homeTeamRecordHome = None
+		self.homeTeamRecordAway = None
+		self.awayTeamRecordTotal = None
+		self.awayTeamRecordConf = None
+		self.awayTeamRecordHome = None
+		self.awayTeamRecordAway = None
 		self.startDate = gameObj.start_date
 		self.completed = gameObj.completed
 		self.homeTeam =  gameObj.home_team
@@ -136,6 +144,27 @@ class cfbGame:
 			if game.game_id == self.gameID:
 				self.homeWinProb = game.home_win_prob
 
+	def setTeamRecords(self, recObj):
+		for team in recObj:
+			if team.team == self.homeTeam:
+				self.homeTeamRecordTotal = self.recordFormat(team.total)
+				self.homeTeamRecordConf = self.recordFormat(team.conference_games)
+				self.homeTeamRecordHome = self.recordFormat(team.home_games)
+				self.homeTeamRecordAway = self.recordFormat(team.away_games)
+			elif team.team == self.awayTeam:
+				self.awayTeamRecordTotal = self.recordFormat(team.total)
+				self.awayTeamRecordConf = self.recordFormat(team.conference_games)
+				self.awayTeamRecordHome = self.recordFormat(team.home_games)
+				self.awayTeamRecordAway = self.recordFormat(team.away_games)
+
+	def recordFormat(self, recObj):
+		retStr = ""
+		if recObj.ties == 0:
+			retStr = str(recObj.wins) + "-" + str(recObj.losses) 
+		else:
+			retStr = str(recObj.wins) + "-" + str(recObj.losses) + "-" + str(recObj.ties)
+		return retStr
+
 # Get initial time variables
 today = datetime.date.today()
 year = today.year
@@ -146,6 +175,7 @@ division = 'fbs'
 configuration = cfbd.Configuration()
 configuration.api_key['Authorization'] = 'pCTgkDkbCkcTh4OWrzO4ph5+/VR/5Fp98y4ORuZCbiG0HKTXt+8Xbs88IfVu4lK9'
 configuration.api_key_prefix['Authorization'] = 'Bearer'
+#configuration.proxy = 'http://proxy.server:3128'
 
 # Get info for weekly matchups for additional peripheral info
 def getMatchupInfo():
@@ -352,6 +382,16 @@ def getPregameWinProb(weekNum):
 	except ApiException as e:
 		print("Exception when calling MetricsApi->get_pregame_win_probabilities: %s\n" % e)
 		return 0
+	
+def getTeamRecords():
+	# create an instance of the API class
+	api_instance = cfbd.GamesApi(cfbd.ApiClient(configuration))
+	try:
+		api_response = api_instance.get_team_records(year=year)
+		return api_response
+	except ApiException as e:
+		print("Exception when calling GamesApi->get_team_records: %s\n" % e)
+		return 0
 
 # Get calendar to know what week it is
 def getCurrWeek():
@@ -427,6 +467,7 @@ def orderGamesList(gamesList):
 # Aggregate matchup information into list of week games and order them
 def matchupListAggregator(weekNum):
 	allTeams = getTeams()
+	teamRecords = getTeamRecords()
 	allVenues = getVenueInfo()
 	rankingsList = getTeamRankingsAP(weekNum)
 	weekGamesList = getWeekGames(weekNum)
@@ -438,6 +479,7 @@ def matchupListAggregator(weekNum):
 	weekGames = []
 	for game in weekGamesList:
 		weekGame = cfbGame(game)
+		weekGame.setTeamRecords(teamRecords)
 		weekGame.setLogoLinks(allTeams)
 		weekGame.setTeamAbbr(allTeams)
 		weekGame.setMatchupEpa(teamEpaList)
