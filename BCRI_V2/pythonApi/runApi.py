@@ -127,12 +127,14 @@ def reloadDataEndpoint():
 	global teamStatsList
 	global currDate
 	global currWeek
+	teamStatsList = []
 	currDate = datetime.now()
 	currWeek = di.getCurrWeek()
 	teamStatsDict = di.getTeamAdvStats()
 	for key in teamStatsDict:
 		teamStatsList.append({"team": key, "stats": teamStatsDict[key]})
 	currWeekGamesOrdered = di.matchupListAggregator(currWeek)
+	return "Data Reloaded"
 
 @app.route("/reloadTest")
 @cross_origin(supports_credentials=True)
