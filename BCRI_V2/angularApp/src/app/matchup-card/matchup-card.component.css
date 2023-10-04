@@ -27,9 +27,6 @@
   }
 
   .cardListText {
-    width: 50%;
-    margin: auto;
-    max-width: 200px;
     -webkit-text-fill-color: white;
     -webkit-text-stroke-color: black;
     -webkit-text-stroke-width: 0.5px; 
