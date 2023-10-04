@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { PopViewService } from '../_services';
+import { FlaskDataService } from '../flask-data.service';
 
 @Component({
   selector: 'app-front-page',
@@ -7,6 +8,5 @@ import { PopViewService } from '../_services';
   styleUrls: ['./front-page.component.css']
 })
 export class FrontPageComponent {
-  constructor(protected popviewService: PopViewService) {
-   }
+  constructor(protected fds: FlaskDataService, protected popviewService: PopViewService) { }
 }

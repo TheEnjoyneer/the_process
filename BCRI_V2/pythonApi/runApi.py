@@ -118,6 +118,22 @@ def getTeamStatsList():
 	data = teamStatsList
 	return jsonify(data)
 
+@app.route("/reloadData")
+@cross_origin(supports_credentials=True)
+def reloadDataEndpoint():
+	print("Reloading api data")
+	global currWeekGamesOrdered
+	global teamStatsDict
+	global teamStatsList
+	global currDate
+	global currWeek
+	currDate = datetime.now()
+	currWeek = di.getCurrWeek()
+	teamStatsDict = di.getTeamAdvStats()
+	for key in teamStatsDict:
+		teamStatsList.append({"team": key, "stats": teamStatsDict[key]})
+	currWeekGamesOrdered = di.matchupListAggregator(currWeek)
+
 @app.route("/reloadTest")
 @cross_origin(supports_credentials=True)
 def reloadTest():

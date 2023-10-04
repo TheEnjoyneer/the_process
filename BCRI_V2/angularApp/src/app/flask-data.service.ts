@@ -8,7 +8,8 @@ import { teamStatsDict, teamStatsList, teamStatsSplit, offenseStats, defenseStat
 })
 export class FlaskDataService {
   //requestStrBase: string = "http://127.0.0.1:5000/";
-  requestStrBase: string = "https://98.180.111.57:5000/";
+  //requestStrBase: string = "https://98.180.111.57:5000/";
+  requestStrBase: string = "https://theenjoyneer.pythonanywhere.com/";
   requestStrGames: string = ""
   requestStr: string = "";
   teamStats!: any;
@@ -16,8 +17,36 @@ export class FlaskDataService {
   currWeekGames!: any;
 
   constructor(private http:HttpClient) {
-    var reqStrExt: string = "currGames";
+    var reqStrExt: string = "reloadData";
     var reqStr: string = this.requestStrBase.concat(reqStrExt.toString());
+    this.http.get(reqStr);
+
+    reqStrExt = "currGames";
+    reqStr = this.requestStrBase.concat(reqStrExt.toString());
+    this.http.get(reqStr).subscribe(data => {
+      this.currWeekGames = <game[]>JSON.parse(JSON.stringify(data));
+      });
+
+    reqStrExt = "teamStatsDict";
+    reqStr = this.requestStrBase.concat(reqStrExt.toString());
+    this.http.get(reqStr).subscribe(data => {
+      this.teamStats = <teamStatsDict>JSON.parse(JSON.stringify(data));
+      });
+
+    reqStrExt = "teamStatsList";
+    reqStr = this.requestStrBase.concat(reqStrExt.toString());
+    this.http.get(reqStr).subscribe(data => {
+      this.teamStatsList = <teamStatsList[]>JSON.parse(JSON.stringify(data));
+      });
+  }
+
+  reloadData() {
+    var reqStrExt: string = "loadData";
+    var reqStr: string = this.requestStrBase.concat(reqStrExt.toString());
+    this.http.get(reqStr);
+
+    reqStrExt = "currGames";
+    reqStr = this.requestStrBase.concat(reqStrExt.toString());
     this.http.get(reqStr).subscribe(data => {
       this.currWeekGames = <game[]>JSON.parse(JSON.stringify(data));
       });

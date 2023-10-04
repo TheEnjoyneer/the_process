@@ -30,6 +30,7 @@
     left: 50%;
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
+    color: var(--offWhiteText);
   }
 
   dd {
@@ -45,4 +46,8 @@
 
   .topContain {
     margin-top: 10px;
+  }
+
+  .fullBack {
+    background-color: var(--layer0);
   }
