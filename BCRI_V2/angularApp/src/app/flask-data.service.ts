@@ -2,6 +2,7 @@ import { Injectable, Optional, SkipSelf } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { teamStatsDict, teamStatsList, teamStatsSplit, offenseStats, defenseStats, game, thresholds } from './dataInterfaces'
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -15,12 +16,34 @@ export class FlaskDataService {
   teamStats!: any;
   teamStatsList!: any;
   currWeekGames!: any;
+  reloaded: boolean = false;
 
   constructor(private http:HttpClient) {
+    this.reloadApi("loaded").then(res => {
+      if (res == "True")
+      {
+        console.log("API-Side Data Already Loaded");
+        this.reloaded = true;
+        this.reloadData();
+      }
+      else
+      {
+        this.reloadApi("reloadData").then(res => {
+          if (res == "Data Reloaded")
+          {
+            console.log("API-Side Data Reloaded");
+            this.reloaded = true;
+            this.reloadData();
+          }
+        });
+      }
+    });
+    /*
     var reqStrExt: string = "reloadData";
     var reqStr: string = this.requestStrBase.concat(reqStrExt.toString());
     this.http.get(reqStr);
 
+    /*
     reqStrExt = "currGames";
     reqStr = this.requestStrBase.concat(reqStrExt.toString());
     this.http.get(reqStr).subscribe(data => {
@@ -38,30 +61,27 @@ export class FlaskDataService {
     this.http.get(reqStr).subscribe(data => {
       this.teamStatsList = <teamStatsList[]>JSON.parse(JSON.stringify(data));
       });
+      */
+  }
+
+  async reloadApi(reqStrExt: string) {
+    //var reqStrExt: string = "reloadData";
+    var reqStr: string = this.requestStrBase.concat(reqStrExt.toString());
+    return await firstValueFrom(this.http.get(reqStr));
   }
 
   reloadData() {
-    var reqStrExt: string = "loadData";
-    var reqStr: string = this.requestStrBase.concat(reqStrExt.toString());
-    this.http.get(reqStr);
+    this.reloadApi("currGames").then(data => {
+      this.currWeekGames = <game[]>JSON.parse(JSON.stringify(data))
+    })
 
-    reqStrExt = "currGames";
-    reqStr = this.requestStrBase.concat(reqStrExt.toString());
-    this.http.get(reqStr).subscribe(data => {
-      this.currWeekGames = <game[]>JSON.parse(JSON.stringify(data));
-      });
+    this.reloadApi("teamStatsDict").then(data => {
+      this.teamStats = <teamStatsDict>JSON.parse(JSON.stringify(data))
+    })
 
-    reqStrExt = "teamStatsDict";
-    reqStr = this.requestStrBase.concat(reqStrExt.toString());
-    this.http.get(reqStr).subscribe(data => {
-      this.teamStats = <teamStatsDict>JSON.parse(JSON.stringify(data));
-      });
-
-    reqStrExt = "teamStatsList";
-    reqStr = this.requestStrBase.concat(reqStrExt.toString());
-    this.http.get(reqStr).subscribe(data => {
-      this.teamStatsList = <teamStatsList[]>JSON.parse(JSON.stringify(data));
-      });
+    this.reloadApi("teamStatsList").then(data => {
+      this.teamStatsList = <teamStatsList[]>JSON.parse(JSON.stringify(data))
+    })
   }
 
   getGames(): Observable<any[]> {

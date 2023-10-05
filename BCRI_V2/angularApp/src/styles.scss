@@ -49,6 +49,7 @@ $app-theme: mat.define-dark-theme((
   font-family: 'Be Vietnam Pro', sans-serif;
 }*/
 :root {
+  font-family: 'Roboto', sans-serif;
   --primary-color: #605DC8;
   --secondary-color: #8B89E6;
   --accent-color: #e8e7fa;
@@ -69,6 +70,8 @@ $app-theme: mat.define-dark-theme((
   --threshold6: #00f91c; 
   --offWhiteText: #F8F0E3;
   --condFormText: #3d3d3d;
+  --outlineIndigo: #0d3d56;
+  --shadowIndigo: #0c374d;
 }
 
 button.primary {

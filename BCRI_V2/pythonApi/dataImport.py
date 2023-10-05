@@ -57,6 +57,7 @@ class cfbGame:
 		self.confGame = gameObj.conference_game
 		self.gameID = gameObj.id
 		self.venue = gameObj.venue
+		self.venueID = gameObj.venue_id
 		if str(gameObj.home_conference) == "FBS Independents":
 			self.homeCon = "FBS INDs"
 		elif str(gameObj.home_conference) == "Conference USA":
@@ -81,12 +82,12 @@ class cfbGame:
 			self.awayCon = "MWC"
 		else:
 			self.awayCon = str(gameObj.away_conference)
-	
+
 	def setLines(self, linesObj):
 		for item in linesObj:
 			if item.provider == "Bovada":
 				self.lines.append(item)
- 
+
 	def printOnlyMatchup(self):
 		print("\n\n" + self.awayTeamRank + " at " + self.homeTeamRank)
 
@@ -136,7 +137,7 @@ class cfbGame:
 
 	def setVenueInfo(self, venObj):
 		for venue in venObj:
-			if venue.name == self.venue:
+			if venue.id == self.venueID:
 				self.location = venue.city + ", " + venue.state
 
 	def setWinProb(self, wpObj):
@@ -160,7 +161,7 @@ class cfbGame:
 	def recordFormat(self, recObj):
 		retStr = ""
 		if recObj.ties == 0:
-			retStr = str(recObj.wins) + "-" + str(recObj.losses) 
+			retStr = str(recObj.wins) + "-" + str(recObj.losses)
 		else:
 			retStr = str(recObj.wins) + "-" + str(recObj.losses) + "-" + str(recObj.ties)
 		return retStr
@@ -175,7 +176,7 @@ division = 'fbs'
 configuration = cfbd.Configuration()
 configuration.api_key['Authorization'] = 'pCTgkDkbCkcTh4OWrzO4ph5+/VR/5Fp98y4ORuZCbiG0HKTXt+8Xbs88IfVu4lK9'
 configuration.api_key_prefix['Authorization'] = 'Bearer'
-#configuration.proxy = 'http://proxy.server:3128'
+configuration.proxy = 'http://proxy.server:3128'
 
 # Get info for weekly matchups for additional peripheral info
 def getMatchupInfo():
@@ -219,7 +220,7 @@ def getTeamRankingsAP(weekNum):
 		if apPollList is not None:
 			pollDict = {}
 			for rankItem in apPollList:
-				pollDict[rankItem.school] = rankItem.rank 
+				pollDict[rankItem.school] = rankItem.rank
 		return pollDict
 	except ApiException as e:
 		print("Exception when calling RankingsApi->get_rankings: %s\n" % e)
@@ -348,7 +349,7 @@ def getTeams():
 	except ApiException as e:
 		print("Exception when calling TeamsApi->get_teams: %s\n" % e)
 		return 0
-	
+
 def getFBSTeams():
 	# create an instance of the API class
 	api_instance = cfbd.TeamsApi(cfbd.ApiClient(configuration))
@@ -361,7 +362,7 @@ def getFBSTeams():
 	except ApiException as e:
 		print("Exception when calling TeamsApi->get_fbs_teams: %s\n" % e)
 		return 0
-	
+
 def getVenueInfo():
 	# create an instance of the API class
 	api_instance = cfbd.VenuesApi(cfbd.ApiClient(configuration))
@@ -371,7 +372,7 @@ def getVenueInfo():
 	except ApiException as e:
 		print("Exception when calling VenuesApi->get_venues: %s\n" % e)
 		return 0
-	
+
 def getPregameWinProb(weekNum):
 	# create an instance of the API class
 	season_type = 'regular'
@@ -382,7 +383,7 @@ def getPregameWinProb(weekNum):
 	except ApiException as e:
 		print("Exception when calling MetricsApi->get_pregame_win_probabilities: %s\n" % e)
 		return 0
-	
+
 def getTeamRecords():
 	# create an instance of the API class
 	api_instance = cfbd.GamesApi(cfbd.ApiClient(configuration))
@@ -442,7 +443,7 @@ def confGamesOrderList(gamesList):
 	confOrder = secList + accList + big10List + big12List + pac12List + otherList
 	return confOrder
 
-# Order games in list 
+# Order games in list
 def orderGamesList(gamesList):
 	rankOnRankList = []
 	oneRankList = []

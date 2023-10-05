@@ -1,5 +1,5 @@
 # Christopher Brant
-# Fall 2023 
+# Fall 2023
 # runApi.py
 import dataImport as di
 import threading
@@ -7,8 +7,53 @@ import pytz
 from datetime import datetime
 from flask import Flask, jsonify, request, redirect
 from flask_cors import CORS, cross_origin
-	
+
+teamStatsDict = None
+teamStatsList = None
+currWeekGamesOrdered = None
+
+def loadApiData():
+	global currWeekGamesOrdered
+	global teamStatsDict
+	global teamStatsList
+	global currWeek
+	teamStatsDict = di.getTeamAdvStats()
+	teamStatsList = []
+	for key in teamStatsDict:
+		teamStatsList.append({"team": key, "stats": teamStatsDict[key]})
+	currWeek = di.getCurrWeek()
+	currWeekGamesOrdered = di.matchupListAggregator(currWeek)
+
+def reloadApiData():
+	print("Reloading api data")
+	global currWeekGamesOrdered
+	global teamStatsDict
+	global teamStatsList
+	global currDate
+	global currWeek
+	currDate = datetime.now()
+	currWeek = di.getCurrWeek()
+	teamStatsDict = di.getTeamAdvStats()
+	for key in teamStatsDict:
+		teamStatsList.append({"team": key, "stats": teamStatsDict[key]})
+	currWeekGamesOrdered = di.matchupListAggregator(currWeek)
+	threading.Timer(86400, loadApiData).start()
+
+def runApiApp():
+	app.run(host="0.0.0.0", port=5000, ssl_context=('cert.pem', 'key.pem'))
+
 app = Flask(__name__)
+CORS(app, support_credentials=True)
+
+#loadApiData()
+
+@app.route("/loaded")
+@cross_origin(supports_credentials=True)
+def checkLoaded():
+    if (currWeekGamesOrdered is None) or (teamStatsDict is None) or (teamStatsList is None):
+        return jsonify("False");
+    else:
+        return jsonify("True");
 
 @app.route("/currGames")
 @cross_origin(supports_credentials=True)
@@ -26,13 +71,13 @@ def getGameCards():
 			# currSpread = game.lines[0].formatted_spread
 			if (game.lines[0].spread is not None) and (game.lines[0].spread > 0):
 				currSpread = game.awayTeamAbbr + " -" + str(game.lines[0].spread)
-			elif (game.lines[0].spread is not None) and (game.lines[0].spread < 0): 
+			elif (game.lines[0].spread is not None) and (game.lines[0].spread < 0):
 				currSpread = game.homeTeamAbbr + " " + str(game.lines[0].spread)
 			elif game.lines[0].spread is None:
 				currSpread = "N/A"
 			if (game.lines[0].spread_open is not None) and (game.lines[0].spread_open > 0):
 				openSpread = game.awayTeamAbbr + " -" + str(game.lines[0].spread_open)
-			elif (game.lines[0].spread_open is not None) and (game.lines[0].spread_open < 0): 
+			elif (game.lines[0].spread_open is not None) and (game.lines[0].spread_open < 0):
 				openSpread = game.homeTeamAbbr + " " + str(game.lines[0].spread_open)
 			elif game.lines[0].spread_open is None:
 				openSpread = "N/A"
@@ -50,7 +95,7 @@ def getGameCards():
 			currSpread = "N/A"
 			currTotal = "N/A"
 			openTotal = "N/A"
-			moneyline = "N/A"	
+			moneyline = "N/A"
 		if game.homeLogo is not None:
 			homeLogo = game.homeLogo
 		else:
@@ -136,43 +181,12 @@ def reloadDataEndpoint():
 	for key in teamStatsDict:
 		teamStatsList.append({"team": key, "stats": teamStatsDict[key]})
 	currWeekGamesOrdered = di.matchupListAggregator(currWeek)
-	return "Data Reloaded"
+	return jsonify("Data Reloaded")
 
 @app.route("/reloadTest")
 @cross_origin(supports_credentials=True)
 def reloadTest():
-	return str(currDate)
-
-def loadApiData():
-	global currWeekGamesOrdered
-	global teamStatsDict
-	global teamStatsList
-	global currWeek
-	teamStatsDict = di.getTeamAdvStats()
-	teamStatsList = []
-	for key in teamStatsDict:
-		teamStatsList.append({"team": key, "stats": teamStatsDict[key]})
-	currWeek = di.getCurrWeek()
-	currWeekGamesOrdered = di.matchupListAggregator(currWeek)
-
-def reloadApiData():
-	print("Reloading api data")
-	global currWeekGamesOrdered
-	global teamStatsDict
-	global teamStatsList
-	global currDate
-	global currWeek
-	teamStatsList = []
-	currDate = datetime.now()
-	currWeek = di.getCurrWeek()
-	teamStatsDict = di.getTeamAdvStats()
-	for key in teamStatsDict:
-		teamStatsList.append({"team": key, "stats": teamStatsDict[key]})
-	currWeekGamesOrdered = di.matchupListAggregator(currWeek)
-	threading.Timer(86400, loadApiData).start()
-
-def runApiApp():
-	app.run(host="0.0.0.0", port=5000, ssl_context=('cert.pem', 'key.pem'))
+	return jsonify(str(currDate))
 
 if __name__ == '__main__':
 	loadApiData()
