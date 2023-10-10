@@ -16,6 +16,7 @@ export class FlaskDataService {
   teamStats!: any;
   teamStatsList!: any;
   currWeekGames!: any;
+  currWeekMarquisGames: number = 0;
   reloaded: boolean = false;
 
   constructor(private http:HttpClient) {
@@ -82,6 +83,14 @@ export class FlaskDataService {
     this.reloadApi("teamStatsList").then(data => {
       this.teamStatsList = <teamStatsList[]>JSON.parse(JSON.stringify(data))
     })
+
+    this.reloadApi("numMarquisGames").then(data => {
+      this.currWeekMarquisGames = <number>JSON.parse(JSON.stringify(data))
+    })
+  }
+
+  getMarquisGameNum() {
+    return this.currWeekMarquisGames;
   }
 
   getGames(): Observable<any[]> {

@@ -43,6 +43,8 @@ export class MatchupCardLogoComponent implements OnInit {
   game!: any;
   homeLogo!: any;
   awayLogo!: any;
+  currWeekMarquisGames!: number;
+  styleString!: string;
   defaultLogo: string = "https://www.seekpng.com/png/full/140-1404801_ncaa-college-football-ncaa-football-logo.png";
 
   constructor(private fds: FlaskDataService, protected popviewService: PopViewService) {
@@ -52,6 +54,27 @@ export class MatchupCardLogoComponent implements OnInit {
     this.game = this.fds.getGame(this.gameID);
     this.homeLogo = this.game.homeLogo;
     this.awayLogo = this.game.awayLogo;
+    this.currWeekMarquisGames = this.fds.getMarquisGameNum();
+
+    /*
+    const test = document.getElementById('test');
+
+    let styleStr1 = new String("div app-matchup-card-logo:nth-child(");
+    let styleStr2 = new String(") { min-width: 500px; }\n");
+    let fullStr: string = "";
+    for (let i = 0; i < this.currWeekMarquisGames; i++)
+    {
+      let indexStr = new String(i);
+      let nextStr = styleStr1.concat((indexStr.concat(styleStr2.toString())).toString());
+      fullStr = fullStr.concat(nextStr.toString());
+    }
+
+    if (test != null)
+    {
+      //test.style = fullStr;
+    }
+    //this.styleString = fullStr.toString();
+    */
   }
 }
 

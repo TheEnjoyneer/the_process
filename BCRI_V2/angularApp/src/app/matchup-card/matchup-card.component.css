@@ -1,3 +1,16 @@
+/*
+@media screen and (min-width: 0px) and (max-width: 700px) {
+  #mobileContent { display: block; }  
+  #largeContent { display: none; }
+}
+*/
+
+@media screen and (min-width: 630px) {
+  .item-0 { min-width: 500px; }   
+  .item-1 { min-width: 500px; } 
+  .item-2 { min-width: 500px; } 
+  .item-3 { min-width: 500px; } 
+}
 
 .cardList {
   display: flex;

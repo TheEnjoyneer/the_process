@@ -1,6 +1,6 @@
 <div class="cardBack" *ngIf="gameData" style="display:flex;">
   <div fxLayout="row wrap" fxLayoutGap="10px grid" fxLayoutAlign="flex-start" class="cardList">
-    <div fxFlex fxFlex.xs="100%" *ngFor="let game of gameData">
+    <div fxFlex fxFlex.xs="100%" *ngFor="let game of gameData; let i=index" ngClass="item-{{i}}">
       <app-matchup-card-logo [gameID]="game?.gameID"></app-matchup-card-logo>
       
       <!---
