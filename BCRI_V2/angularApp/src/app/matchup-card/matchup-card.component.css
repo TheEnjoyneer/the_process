@@ -5,6 +5,11 @@
 }
 */
 
+.buttonSpace {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
 @media screen and (min-width: 630px) {
   .item-0 { min-width: 500px; }   
   .item-1 { min-width: 500px; } 
