@@ -26,6 +26,9 @@ import { MatListModule } from '@angular/material/list';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { Routes, RouterModule } from '@angular/router';
+import { FullPreviewPageComponent } from './full-preview-page/full-preview-page.component';
+import { FullRecapPageComponent } from './full-recap-page/full-recap-page.component';
 
 @NgModule({
   imports:      [ 
@@ -44,8 +47,14 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
                     MatListModule,
                     FormsModule,
                     MatDialogModule,
-                    MatSnackBarModule
+                    MatSnackBarModule,
+                    RouterModule.forRoot([
+                      {path: '', component: MatchupCardComponent},
+                      {path: 'full-preview', component: FullPreviewPageComponent},
+                      {path: 'full-recap', component: SuccessGridComponent},
+                    ]),
                 ],
+  exports: [ RouterModule ],
   declarations: [ 
                     FrontPageComponent, 
                     PopViewComponent,
@@ -57,7 +66,9 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
                     InfoGridComponent,
                     ExplosiveGridComponent,
                     SuccessGridComponent,
-                    BettingGridComponent
+                    BettingGridComponent,
+                    FullPreviewPageComponent,
+                    FullRecapPageComponent
                 ],
   providers:    [ FlaskDataService ],
   bootstrap:    [ FrontPageComponent ]

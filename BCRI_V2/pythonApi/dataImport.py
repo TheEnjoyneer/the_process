@@ -4,19 +4,20 @@
 # Base Data Import Testing File
 
 from __future__ import print_function
-import datetime
-from datetime import date
+from datetime import datetime
+import random
+import pytz
 import cfbd
+from cfbd.rest import ApiException
 #import numpy as np
 #import pandas as pd
 #import matplotlib.pyplot as plt
-from cfbd.rest import ApiException
-from pprint import pprint
+#from pprint import pprint
 
 class weekClass:
 	def __init__(self, weekObj):
-		self.firstGameDate = datetime.datetime(int(weekObj.first_game_start[0:4]), int(weekObj.first_game_start[5:7]), int(weekObj.first_game_start[8:10]))
-		self.lastGameDate = datetime.datetime(int(weekObj.last_game_start[0:4]), int(weekObj.last_game_start[5:7]), int(weekObj.last_game_start[8:10]))
+		self.firstGameDate = datetime(int(weekObj.first_game_start[0:4]), int(weekObj.first_game_start[5:7]), int(weekObj.first_game_start[8:10]))
+		self.lastGameDate = datetime(int(weekObj.last_game_start[0:4]), int(weekObj.last_game_start[5:7]), int(weekObj.last_game_start[8:10]))
 		self.weekNum = weekObj.week
 
 class cfbGame:
@@ -50,6 +51,8 @@ class cfbGame:
 		self.completed = gameObj.completed
 		self.homeTeam =  gameObj.home_team
 		self.awayTeam = gameObj.away_team
+		self.homeTeamRating = None
+		self.awayTeamRating = None
 		self.homeTeamAbbr = None
 		self.awayTeamAbbr = None
 		self.homeAbbrRank = None
@@ -130,6 +133,8 @@ class cfbGame:
 	def setLogoLinks(self, teamObj):
 		self.homeLogo = teamObj[self.homeTeam].logos[0]
 		self.awayLogo = teamObj[self.awayTeam].logos[0]
+		if (self.homeTeam == "Florida"):
+			print(self.homeLogo)
 
 	def setTeamAbbr(self, teamObj):
 		self.homeTeamAbbr = teamObj[self.homeTeam].abbreviation
@@ -158,6 +163,13 @@ class cfbGame:
 				self.awayTeamRecordHome = self.recordFormat(team.home_games)
 				self.awayTeamRecordAway = self.recordFormat(team.away_games)
 
+	def setTeamRatings(self, rateObj):
+		for team in rateObj:
+			if team.team == self.homeTeam:
+				self.homeTeamRating = team.rating
+			elif team.team == self.awayTeam:
+				self.awayTeamRating = team.rating
+
 	def recordFormat(self, recObj):
 		retStr = ""
 		if recObj.ties == 0:
@@ -167,7 +179,7 @@ class cfbGame:
 		return retStr
 
 # Get initial time variables
-today = datetime.date.today()
+today = datetime.today()
 year = today.year
 # Get week of season from command line (set up later, hard code for now)
 division = 'fbs'
@@ -176,7 +188,7 @@ division = 'fbs'
 configuration = cfbd.Configuration()
 configuration.api_key['Authorization'] = 'pCTgkDkbCkcTh4OWrzO4ph5+/VR/5Fp98y4ORuZCbiG0HKTXt+8Xbs88IfVu4lK9'
 configuration.api_key_prefix['Authorization'] = 'Bearer'
-configuration.proxy = 'http://proxy.server:3128'
+#configuration.proxy = 'http://proxy.server:3128'
 
 # Get info for weekly matchups for additional peripheral info
 def getMatchupInfo():
@@ -394,19 +406,30 @@ def getTeamRecords():
 		print("Exception when calling GamesApi->get_team_records: %s\n" % e)
 		return 0
 
+def getSPRatings():
+    # create an instance of the API class
+    api_instance = cfbd.RatingsApi(cfbd.ApiClient(configuration))
+    try:
+        # Historical SP+ ratings
+        api_response = api_instance.get_sp_ratings(year=year)
+        return api_response
+        #pprint(api_response)
+    except ApiException as e:
+        print("Exception when calling RatingsApi->get_sp_ratings: %s\n" % e)
+        return 0
+
 # Get calendar to know what week it is
 def getCurrWeek():
 	currWeek = 0
 	# create an instance of the API class
 	api_instance = cfbd.GamesApi(cfbd.ApiClient(configuration))
-	season_type = 'regular'
 	try:
 		api_response = api_instance.get_calendar(year=year)
 		weeksFormatted = []
 		for week in api_response:
 			weeksFormatted.append(weekClass(week))
-		currDate = str(date.today())
-		testDate = datetime.datetime(int(currDate[0:4]), int(currDate[5:7]), int(currDate[8:10]))
+		currDate = str(datetime.today())
+		testDate = datetime(int(currDate[0:4]), int(currDate[5:7]), int(currDate[8:10]))
 		for i in range(1, len(weeksFormatted) - 1):
 			if (testDate < weeksFormatted[i].lastGameDate) and (testDate > weeksFormatted[i-1].lastGameDate):
 				currWeek = weeksFormatted[i].weekNum
@@ -414,7 +437,6 @@ def getCurrWeek():
 	except ApiException as e:
 		print("Exception when calling GamesApi->get_calendar: %s\n" % e)
 		return 0
-
 
 
 # Order lists via conference games
@@ -443,8 +465,50 @@ def confGamesOrderList(gamesList):
 	confOrder = secList + accList + big10List + big12List + pac12List + otherList
 	return confOrder
 
+def calcWatchabilityList(gameList):
+    watchabilityList = []
+    for game in gameList:
+        watchability = calcWatchability(game)
+        watchabilityList.append(watchability)
+    return watchabilityList
+
+
+# Function for calculating watchability similar to KFord value out of 10
+def calcWatchability(gameObj):
+    # Get weighted score of projected quality based on teams ratings
+    avgRating = (gameObj.homeTeamRating + gameObj.awayTeamRating) / 2
+
+    # Get projected points spread
+    watchability = avgRating - abs(gameObj.lines[0].spread)
+
+    return watchability
+
+def watchOrder(gamesList, watchList):
+    # Create dictionary of watchability value: gameID pairs
+    watchDict = {}
+    for game in gamesList:
+        # Calculate watchability value
+        watchability = calcWatchability(game)
+        # Normalize watchability after calculated
+        watchability = (watchability - min(watchList)) / (max(watchList) - min(watchList)) * 10
+        watchDict[watchability] = game.gameID
+
+    # Sort that dictionary by watchability value from highest to lowest
+    watchDictOrdered = dict(sorted(watchDict.items(), reverse=True))
+
+    # Remake ordered dictionary into a list for return
+    orderedGamesList = []
+    for key in watchDictOrdered:
+        for listGame in gamesList:
+            if watchDictOrdered[key] == listGame.gameID:
+                orderedGamesList.append(listGame)
+
+    return orderedGamesList
+
+
 # Order games in list
 def orderGamesList(gamesList):
+    '''
 	rankOnRankList = []
 	oneRankList = []
 	otherList = []
@@ -461,9 +525,73 @@ def orderGamesList(gamesList):
 	orderedOneRank = confGamesOrderList(oneRankList)
 	orderedOther = confGamesOrderList(otherList)
 
-	orderedList = orderedRankOnRank + orderedOneRank + orderedOther
+	oldOrderedList = orderedRankOnRank + orderedOneRank + orderedOther
+    '''
+    watchabilityRange = calcWatchabilityList(gamesList)
+    weekGameSlate = []
+    earlySlateTimes = ["12:00 PM", "1:00 PM", "2:00 PM"]
+    earlySlate = []
+    afternoonSlateTimes = ["3:30 PM", "3:30 PM", "4:00 PM", "5:00 PM", "5:30 PM", "6:00 PM"]
+    afternoonSlate = []
+    primetimeSlateTimes = ["7:00 PM", "7:30 PM", "8:00 PM"]
+    primetimeSlate = []
+    lateSlate = []
 
-	return orderedList
+    for game in gamesList:
+        gameDate, gameTime = getDateStrs(game.startDate)
+        gameDate = datetime.fromisoformat(game.startDate.replace('Z', '+00:00'))
+        if not gameDate.strftime("%A") == "Saturday":
+            weekGameSlate.append(game)
+        elif gameTime in earlySlateTimes:
+            earlySlate.append(game)
+        elif gameTime in afternoonSlateTimes:
+            afternoonSlate.append(game)
+        elif gameTime in primetimeSlateTimes:
+            primetimeSlate.append(game)
+        else:
+            lateSlate.append(game)
+
+    weekGameSlate = watchOrder(weekGameSlate, watchabilityRange)
+    earlySlate = watchOrder(earlySlate, watchabilityRange)
+    afternoonSlate = watchOrder(afternoonSlate, watchabilityRange)
+    primetimeSlate = watchOrder(primetimeSlate, watchabilityRange)
+    lateSlate = watchOrder(lateSlate, watchabilityRange)
+    orderedList =  earlySlate + afternoonSlate + primetimeSlate + lateSlate + weekGameSlate
+
+    firstMarquis = getTopWatchable(orderedList)
+    orderedList.pop(orderedList.index(firstMarquis))
+    secondMarquis = getTopWatchable(orderedList)
+    orderedList.pop(orderedList.index(secondMarquis))
+    thirdMarquis = getTopWatchable(orderedList)
+    orderedList.pop(orderedList.index(thirdMarquis))
+    fourthMarquis = getTopWatchable(orderedList)
+    orderedList.pop(orderedList.index(fourthMarquis))
+
+    orderedList = [firstMarquis] + [secondMarquis] + [thirdMarquis] + [fourthMarquis] + orderedList
+
+    return orderedList
+
+
+def getTopWatchable(orderedList):
+    maxWatchability = calcWatchability(orderedList[0])
+    for game in orderedList:
+        if calcWatchability(game) >= maxWatchability:
+            maxWatchability = calcWatchability(game)
+            gameToPop = game
+
+    return gameToPop
+
+def getDateStrs(dateObj):
+    # Do string manipulation here to handle start time strings
+	eastern = pytz.timezone('US/Eastern')
+	startDate = datetime.fromisoformat(dateObj.replace('Z', '+00:00'))
+	startDateStr = startDate.strftime("%-m-%-d-%Y")
+	if not startDate.time():
+		startTimeStr = "TBD"
+	else:
+		startTimeStr = startDate.astimezone(eastern).strftime("%-I:%M %p")
+
+	return startDateStr, startTimeStr
 
 # Aggregate matchup information into list of week games and order them
 def matchupListAggregator(weekNum):
@@ -476,6 +604,7 @@ def matchupListAggregator(weekNum):
 	teamEpaList = getTeamEpa()
 	teamAdvStatsList = getTeamAdvStats()
 	weekGamesPreWinProb = getPregameWinProb(weekNum)
+	spRatings = getSPRatings()
 
 	weekGames = []
 	for game in weekGamesList:
@@ -488,6 +617,7 @@ def matchupListAggregator(weekNum):
 		weekGame.setMatchupRanks(rankingsList)
 		weekGame.setVenueInfo(allVenues)
 		weekGame.setWinProb(weekGamesPreWinProb)
+		weekGame.setTeamRatings(spRatings)
 		for lineGame in weekGamesLines:
 			if weekGame.gameID == lineGame.id:
 				weekGame.setLines(lineGame.lines)

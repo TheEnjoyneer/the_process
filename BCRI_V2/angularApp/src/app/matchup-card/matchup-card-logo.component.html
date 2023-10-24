@@ -14,7 +14,7 @@ left no-repeat; background-size: 40% auto; background-color: var(--layer2); padd
         <mat-card-actions class="example-action">
           <button class="buttonSpace" mat-raised-button color="customColor" (click)="popviewService.open(game?.gameID)">QUICK LOOK</button>
           <mat-divider></mat-divider>
-          <button mat-raised-button color="customColor">FULL PREVIEW</button>
+          <button mat-raised-button color="customColor" (click)="pageLink()">FULL PREVIEW</button>
         </mat-card-actions>
         <app-pop-view [id]='game?.gameID'>
           <h1 style="text-align: center;">{{game?.awayTeamRank}} vs {{game?.homeTeamRank}}</h1>

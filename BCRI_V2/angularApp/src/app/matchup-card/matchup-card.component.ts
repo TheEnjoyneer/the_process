@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { PopViewService } from '../_services';
 import { FlaskDataService } from '../flask-data.service';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -47,7 +48,7 @@ export class MatchupCardLogoComponent implements OnInit {
   styleString!: string;
   defaultLogo: string = "https://www.seekpng.com/png/full/140-1404801_ncaa-college-football-ncaa-football-logo.png";
 
-  constructor(private fds: FlaskDataService, protected popviewService: PopViewService) {
+  constructor(private fds: FlaskDataService, protected popviewService: PopViewService, private router: Router, private activeRoute: ActivatedRoute) {
   }
 
   ngOnInit() {
@@ -55,26 +56,20 @@ export class MatchupCardLogoComponent implements OnInit {
     this.homeLogo = this.game.homeLogo;
     this.awayLogo = this.game.awayLogo;
     this.currWeekMarquisGames = this.fds.getMarquisGameNum();
+  }
 
-    /*
-    const test = document.getElementById('test');
-
-    let styleStr1 = new String("div app-matchup-card-logo:nth-child(");
-    let styleStr2 = new String(") { min-width: 500px; }\n");
-    let fullStr: string = "";
-    for (let i = 0; i < this.currWeekMarquisGames; i++)
+  pageLink() {
+    if (this.game.completed == true)
     {
-      let indexStr = new String(i);
-      let nextStr = styleStr1.concat((indexStr.concat(styleStr2.toString())).toString());
-      fullStr = fullStr.concat(nextStr.toString());
+      this.router.navigate(['/full-recap'], {queryParams: {
+        gameID: this.gameID,
+      }});
     }
-
-    if (test != null)
-    {
-      //test.style = fullStr;
+    else {
+      this.router.navigate(['/full-preview'], {queryParams: {
+        gameID: this.gameID,
+      }});
     }
-    //this.styleString = fullStr.toString();
-    */
   }
 }
 
