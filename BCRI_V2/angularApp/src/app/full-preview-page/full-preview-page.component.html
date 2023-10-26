@@ -1,3 +1,4 @@
-<div>
-    <p>{{this.gameID}}</p>
+<div class="test">
+    <h1 style="text-align: center;">{{this.game?.awayTeamRank}} vs {{this.game?.homeTeamRank}}</h1>
+    <app-preview-content [gameID]="this.gameID" style="background-color: var(--layer3)"></app-preview-content>
 </div>

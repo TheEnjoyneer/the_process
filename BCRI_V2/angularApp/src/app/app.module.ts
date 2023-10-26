@@ -29,6 +29,8 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { Routes, RouterModule } from '@angular/router';
 import { FullPreviewPageComponent } from './full-preview-page/full-preview-page.component';
 import { FullRecapPageComponent } from './full-recap-page/full-recap-page.component';
+import { FantasyBettingComponent } from './fantasy-betting/fantasy-betting.component';
+import { RecapsListComponent } from './recaps-list/recaps-list.component';
 
 @NgModule({
   imports:      [ 
@@ -52,6 +54,8 @@ import { FullRecapPageComponent } from './full-recap-page/full-recap-page.compon
                       {path: '', component: MatchupCardComponent},
                       {path: 'full-preview', component: FullPreviewPageComponent},
                       {path: 'full-recap', component: SuccessGridComponent},
+                      {path: 'recaps', component: RecapsListComponent},
+                      {path: 'fantasy', component: FantasyBettingComponent},
                     ]),
                 ],
   exports: [ RouterModule ],
@@ -68,7 +72,9 @@ import { FullRecapPageComponent } from './full-recap-page/full-recap-page.compon
                     SuccessGridComponent,
                     BettingGridComponent,
                     FullPreviewPageComponent,
-                    FullRecapPageComponent
+                    FullRecapPageComponent,
+                    FantasyBettingComponent,
+                    RecapsListComponent
                 ],
   providers:    [ FlaskDataService ],
   bootstrap:    [ FrontPageComponent ]

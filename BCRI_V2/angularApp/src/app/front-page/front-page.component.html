@@ -5,15 +5,15 @@
       <mat-icon>menu</mat-icon>
     </button>
     <mat-menu #menu="matMenu">
-      <button mat-menu-item>
+      <button mat-menu-item (click)="homeLink()">
         <mat-icon>home</mat-icon>
         <span>Home</span>
       </button>
-      <button mat-menu-item>
+      <button mat-menu-item (click)="recapsLink()">
         <mat-icon>history</mat-icon>
         <span>Postgame Recaps</span>
       </button>
-      <button mat-menu-item>
+      <button mat-menu-item (click)="fantasyLink()">
         <mat-icon>lock</mat-icon>
         <span>Fantasy Betting</span>
       </button>
@@ -26,9 +26,6 @@
   </mat-toolbar>
   <div>
     <router-outlet></router-outlet>
-    <!---
-    <app-matchup-card></app-matchup-card>
-    -->
   </div>
   <div>
     <app-pop-view id='glossary'>

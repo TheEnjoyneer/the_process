@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { PopViewService } from '../_services';
 import { FlaskDataService } from '../flask-data.service';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -11,7 +12,7 @@ import { Observable } from 'rxjs';
 export class FrontPageComponent {
   testBool!: boolean;
 
-  constructor(protected fds: FlaskDataService, protected popviewService: PopViewService) { }
+  constructor(protected fds: FlaskDataService, protected popviewService: PopViewService, private router: Router) { }
 
   reloadBackend()
   {
@@ -23,5 +24,20 @@ export class FrontPageComponent {
         window.location.reload();
       }
     });
+  }
+
+  homeLink()
+  {
+    this.router.navigate(['/']);
+  }
+
+  recapsLink()
+  {
+    this.router.navigate(['/recaps']);
+  }
+
+  fantasyLink()
+  {
+    this.router.navigate(['/fantasy']);
   }
 }
