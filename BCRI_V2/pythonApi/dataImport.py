@@ -6,6 +6,7 @@
 from __future__ import print_function
 from datetime import datetime
 import random
+import copy
 import pytz
 import cfbd
 from cfbd.rest import ApiException
@@ -71,6 +72,8 @@ class cfbGame:
 			self.homeCon = "AAC"
 		elif str(gameObj.home_conference) == "Mountain West":
 			self.homeCon = "MWC"
+		elif str(gameObj.home_conference) == "FCS Independents":
+			self.homeCon = "FCS INDs"
 		else:
 			self.homeCon = str(gameObj.home_conference)
 		if str(gameObj.away_conference) == "FBS Independents":
@@ -83,6 +86,8 @@ class cfbGame:
 			self.awayCon = "AAC"
 		elif str(gameObj.away_conference) == "Mountain West":
 			self.awayCon = "MWC"
+		elif str(gameObj.away_conference) == "FCS Independents":
+			self.awayCon = "FCS INDs"
 		else:
 			self.awayCon = str(gameObj.away_conference)
 
@@ -166,9 +171,19 @@ class cfbGame:
 	def setTeamRatings(self, rateObj):
 		for team in rateObj:
 			if team.team == self.homeTeam:
-				self.homeTeamRating = team.rating
+				if team.rating is not None:
+					self.homeTeamRating = team.rating
+				else:
+					self.homeTeamRating = 0
 			elif team.team == self.awayTeam:
-				self.awayTeamRating = team.rating
+				if team.rating is not None:
+					self.awayTeamRating = team.rating
+				else:
+					self.awayTeamRating = 0
+		if self.homeTeamRating is None:
+			self.homeTeamRating = 0
+		if self.awayTeamRating is None:
+			self.awayTeamRating = 0
 
 	def recordFormat(self, recObj):
 		retStr = ""
@@ -188,6 +203,7 @@ division = 'fbs'
 configuration = cfbd.Configuration()
 configuration.api_key['Authorization'] = 'pCTgkDkbCkcTh4OWrzO4ph5+/VR/5Fp98y4ORuZCbiG0HKTXt+8Xbs88IfVu4lK9'
 configuration.api_key_prefix['Authorization'] = 'Bearer'
+# Comment out the proxy when not using PythonAnywhere
 #configuration.proxy = 'http://proxy.server:3128'
 
 # Get info for weekly matchups for additional peripheral info
@@ -476,12 +492,21 @@ def calcWatchabilityList(gameList):
 # Function for calculating watchability similar to KFord value out of 10
 def calcWatchability(gameObj):
     # Get weighted score of projected quality based on teams ratings
-    avgRating = (gameObj.homeTeamRating + gameObj.awayTeamRating) / 2
-
-    # Get projected points spread
-    watchability = avgRating - abs(gameObj.lines[0].spread)
-
-    return watchability
+    if len(gameObj.lines) != 0:
+        line = gameObj.lines[0].spread
+    else:
+        line = 21
+    if (gameObj.homeTeamRating is not None) and (gameObj.awayTeamRating is not None):
+        avgRating = (gameObj.homeTeamRating + gameObj.awayTeamRating) / 2
+        return avgRating - abs(line)
+    elif gameObj.awayTeamRating is not None:
+        avgRating = gameObj.awayTeamRating / 2
+        return avgRating - abs(line)
+    elif gameObj.homeTeamRating is not None:
+        avgRating = gameObj.homeTeamRating / 2
+        return avgRating - abs(line)
+    else:
+        return 0
 
 def watchOrder(gamesList, watchList):
     # Create dictionary of watchability value: gameID pairs
@@ -508,39 +533,22 @@ def watchOrder(gamesList, watchList):
 
 # Order games in list
 def orderGamesList(gamesList):
-    '''
-	rankOnRankList = []
-	oneRankList = []
-	otherList = []
-
-	for game in gamesList:
-		if game.rankOnRank == True:
-			rankOnRankList.append(game)
-		elif (game.homeRank is not None) or (game.awayRank is not None):
-			oneRankList.append(game)
-		else:
-			otherList.append(game)
-
-	orderedRankOnRank = confGamesOrderList(rankOnRankList)
-	orderedOneRank = confGamesOrderList(oneRankList)
-	orderedOther = confGamesOrderList(otherList)
-
-	oldOrderedList = orderedRankOnRank + orderedOneRank + orderedOther
-    '''
+    eastern = pytz.timezone('US/Eastern')
     watchabilityRange = calcWatchabilityList(gamesList)
     weekGameSlate = []
     earlySlateTimes = ["12:00 PM", "1:00 PM", "2:00 PM"]
     earlySlate = []
     afternoonSlateTimes = ["3:30 PM", "3:30 PM", "4:00 PM", "5:00 PM", "5:30 PM", "6:00 PM"]
     afternoonSlate = []
-    primetimeSlateTimes = ["7:00 PM", "7:30 PM", "8:00 PM"]
+    primetimeSlateTimes = ["7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM", "9:00 PM"]
     primetimeSlate = []
+    lateSlateTimes = ["9:30 PM", "10:00 PM", "10:30 PM", "11:00 PM", "11:30 PM", "11:59 PM"]
     lateSlate = []
 
     for game in gamesList:
-        gameDate, gameTime = getDateStrs(game.startDate)
+        startDate, gameTime = getDateStrs(game.startDate)
         gameDate = datetime.fromisoformat(game.startDate.replace('Z', '+00:00'))
-        if not gameDate.strftime("%A") == "Saturday":
+        if not gameDate.astimezone(eastern).strftime("%A") == "Saturday":
             weekGameSlate.append(game)
         elif gameTime in earlySlateTimes:
             earlySlate.append(game)
@@ -556,6 +564,33 @@ def orderGamesList(gamesList):
     afternoonSlate = watchOrder(afternoonSlate, watchabilityRange)
     primetimeSlate = watchOrder(primetimeSlate, watchabilityRange)
     lateSlate = watchOrder(lateSlate, watchabilityRange)
+
+    # Create Games to be card splitters between slate times
+    weekGameSplitter = copy.copy(gamesList[0])
+    weekGameSplitter.gameID = "WeekGamesSlate"
+    weekGameSplitter.completed = False
+    weekGameSplitter.homeTeam = "timeSplit"
+    
+    earlySplitter = copy.copy(gamesList[0])
+    earlySplitter.gameID = "EarlySlate"
+    earlySplitter.completed = False
+    earlySplitter.homeTeam = "timeSplit"
+
+    afternoonSplitter = copy.copy(gamesList[0])
+    afternoonSplitter.gameID = "AfternoonSlate"
+    afternoonSplitter.completed = False
+    afternoonSplitter.homeTeam = "timeSplit"
+
+    primeTimeSplitter = copy.copy(gamesList[0])
+    primeTimeSplitter.gameID = "PrimetimeSlate"
+    primeTimeSplitter.completed = False
+    primeTimeSplitter.homeTeam = "timeSplit"
+
+    lateSplitter = copy.copy(gamesList[0])
+    lateSplitter.gameID = "LateSlate"
+    lateSplitter.completed = False
+    lateSplitter.homeTeam = "timeSplit"
+
     orderedList =  earlySlate + afternoonSlate + primetimeSlate + lateSlate + weekGameSlate
 
     firstMarquis = getTopWatchable(orderedList)
@@ -565,6 +600,13 @@ def orderGamesList(gamesList):
     thirdMarquis = getTopWatchable(orderedList)
     orderedList.pop(orderedList.index(thirdMarquis))
     fourthMarquis = getTopWatchable(orderedList)
+    orderedList.pop(orderedList.index(fourthMarquis))
+
+    orderedList = [earlySplitter] + earlySlate + [afternoonSplitter] + afternoonSlate + [primeTimeSplitter] + primetimeSlate + [weekGameSplitter] + weekGameSlate
+
+    orderedList.pop(orderedList.index(firstMarquis))
+    orderedList.pop(orderedList.index(secondMarquis))
+    orderedList.pop(orderedList.index(thirdMarquis))
     orderedList.pop(orderedList.index(fourthMarquis))
 
     orderedList = [firstMarquis] + [secondMarquis] + [thirdMarquis] + [fourthMarquis] + orderedList
@@ -585,11 +627,15 @@ def getDateStrs(dateObj):
     # Do string manipulation here to handle start time strings
 	eastern = pytz.timezone('US/Eastern')
 	startDate = datetime.fromisoformat(dateObj.replace('Z', '+00:00'))
-	startDateStr = startDate.strftime("%-m-%-d-%Y")
+	# Use hashes instead of dashes when running on windows python
+	#startDateStr = startDate.strftime("%-m-%-d-%Y")
+	startDateStr = startDate.astimezone(eastern).strftime("%#m-%#d-%Y")
 	if not startDate.time():
 		startTimeStr = "TBD"
 	else:
-		startTimeStr = startDate.astimezone(eastern).strftime("%-I:%M %p")
+		# Use hashes instead of dashes when running on windows python
+		#startTimeStr = startDate.astimezone(eastern).strftime("%-I:%M %p")
+		startTimeStr = startDate.astimezone(eastern).strftime("%#I:%M %p")
 
 	return startDateStr, startTimeStr
 

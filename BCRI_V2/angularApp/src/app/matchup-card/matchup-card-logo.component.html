@@ -1,6 +1,7 @@
-<mat-card class="cardListItem mat-elevation-z8" 
-style="background: url({{homeLogo}}) right no-repeat, url({{awayLogo}}) 
-left no-repeat; background-size: 40% auto; background-color: var(--layer2); padding: 15px;">
+<div *ngIf="game?.homeTeam != 'timeSplit'">
+  <mat-card class="cardListItem mat-elevation-z8" *ngIf="game?.completed == false"
+  style="background: url({{homeLogo}}) right no-repeat, url({{awayLogo}}) 
+  left no-repeat; background-size: 40% auto; background-color: var(--layer2); padding: 15px;">
     <mat-card-content>
         <div class="cardListText">
         <p>{{game?.awayAbbrRank}} at {{game?.homeAbbrRank}}</p>
@@ -27,3 +28,54 @@ left no-repeat; background-size: 40% auto; background-color: var(--layer2); padd
         </app-pop-view>
     </mat-card-content>
   </mat-card>
+</div>
+<div *ngIf="game?.homeTeam == 'timeSplit'">
+  <div *ngIf="game?.gameID == 'WeekGamesSlate'">
+    <mat-card class="cardListItem mat-elevation-z8 dividers" *ngIf="game?.completed == false">
+      <mat-card-content class="matCardContent">
+          <div class="cardListText">
+          <p>Week Games Slate</p>
+          </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  <div *ngIf="game?.gameID == 'EarlySlate'">
+    <mat-card class="cardListItem mat-elevation-z8 dividers" *ngIf="game?.completed == false">
+      <mat-card-content class="matCardContent">
+          <div class="cardListText">
+          <p>Early Slate</p>
+          </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  <div *ngIf="game?.gameID == 'AfternoonSlate'">
+    <mat-card class="cardListItem mat-elevation-z8 dividers" *ngIf="game?.completed == false">
+      <mat-card-content class="matCardContent">
+          <div class="cardListText">
+          <p>Afternoon Slate</p>
+          </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  <div *ngIf="game?.gameID == 'PrimetimeSlate'">
+    <mat-card class="cardListItem mat-elevation-z8 dividers" *ngIf="game?.completed == false">
+      <mat-card-content class="matCardContent">
+          <div class="cardListText">
+          <p>Primetime Slate</p>
+          </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  <div *ngIf="game?.gameID == 'LateSlate'">
+    <mat-card class="cardListItem mat-elevation-z8 dividers" *ngIf="game?.completed == false">
+      <mat-card-content class="matCardContent">
+          <div class="cardListText">
+          <p>Late Night Slate</p>
+          </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+
+
+

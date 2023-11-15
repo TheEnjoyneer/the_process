@@ -5,7 +5,7 @@ import dataImport as di
 import threading
 import pytz
 from datetime import datetime
-from flask import Flask, jsonify, request, redirect
+from flask import Flask, jsonify
 from flask_cors import CORS, cross_origin
 
 teamStatsDict = None
@@ -115,7 +115,7 @@ def getGameCards():
 		# Do string manipulation here to handle start time strings
 		eastern = pytz.timezone('US/Eastern')
 		startDate = datetime.fromisoformat(game.startDate.replace('Z', '+00:00'))
-		startDateStr = startDate.strftime("%-m-%-d-%Y")
+		startDateStr = startDate.astimezone(eastern).strftime("%-m-%-d-%Y")
 		if not startDate.time():
 			startTimeStr = "TBD"
 		else:
@@ -164,6 +164,16 @@ def getTeamStatsDict():
 def getTeamStatsList():
 	data = teamStatsList
 	return jsonify(data)
+
+@app.route("/numMarquisGames")
+@cross_origin(supports_credentials=True)
+def numMarquisGames():
+    numGames = 0
+    for game in currWeekGamesOrdered:
+        if game.rankOnRank:
+            numGames = numGames + 1
+
+    return jsonify(numGames)
 
 @app.route("/reloadData")
 @cross_origin(supports_credentials=True)

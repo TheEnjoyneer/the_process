@@ -14,7 +14,8 @@
   .item-0 { min-width: 500px; }   
   .item-1 { min-width: 500px; } 
   .item-2 { min-width: 500px; } 
-  .item-3 { min-width: 500px; } 
+  .item-3 { min-width: 500px; }
+  .dividers { min-height: 339px; }
 }
 
 .cardList {
@@ -23,6 +24,10 @@
   flex-wrap: wrap;
   justify-content: flex-start;
   align-self: center;
+}
+
+.matCardContent {
+  margin: auto;
 }
 
 /* Column Gap */
