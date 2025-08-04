@@ -3,6 +3,7 @@
 import json
 import random
 import warnings
+from datetime import datetime
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 
@@ -93,6 +94,15 @@ def getCalendarWeek(seasonYear, weekNum, seasonType):
     for i in range(len(result['game'])):
         result['game'][i]['watchability'] = random.randint(1,100)
 
+    """
+    weekNights = []
+    saturdayEarly = []
+    saturdayAfternoon = []
+    saturdayEvening = []
+    saturdayLate = []
+    for game in result['game']:
+        if game[]
+    """
 
     return result
 
