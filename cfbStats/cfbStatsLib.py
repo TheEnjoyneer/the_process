@@ -1,6 +1,7 @@
 # cfbStatsLib.py
 
 import json
+import pytz
 import random
 import warnings
 from datetime import datetime
@@ -14,6 +15,7 @@ headers = {
     "Authorization": "Bearer pCTgkDkbCkcTh4OWrzO4ph5+/VR/5Fp98y4ORuZCbiG0HKTXt+8Xbs88IfVu4lK9",
     "Content-Type": "application/json"
     }
+timezone = pytz.timezone('America/New_York')
 
 # Library functions for internal use definitions here
 def createClient():
@@ -41,6 +43,7 @@ def getCalendarWeek(seasonYear, weekNum, seasonType):
                     awayClassification: { _eq: "fbs" }
                 }
             }
+            orderBy: { startDate: ASC }
         ) {
             attendance
             awayClassification
@@ -94,17 +97,39 @@ def getCalendarWeek(seasonYear, weekNum, seasonType):
     for i in range(len(result['game'])):
         result['game'][i]['watchability'] = random.randint(1,100)
 
-    """
-    weekNights = []
-    saturdayEarly = []
-    saturdayAfternoon = []
-    saturdayEvening = []
-    saturdayLate = []
-    for game in result['game']:
-        if game[]
-    """
+    gameList = sorted(result['game'], key=lambda x: x['watchability'])
 
-    return result
+    weekNights = []         # Anything before saturday at noon eastern
+    saturdayEarly = []      # Anything saturday before 3 eastern
+    saturdayAfternoon = []  # Anything saturday before 7 eastern
+    saturdayEvening = []    # Anything saturday before 10 eastern
+    saturdayLate = []       # Anything leftover
+    extraNights = []
+    weeknightOpts = ["Tuesday", "Wednesday", "Thursday", "Friday"]
+    for game in result['game']:
+        currTime = datetime.strptime(game['startDate'], '%Y-%m-%dT%H:%M:%S')
+        localTime = currTime.astimezone(timezone)
+        localHour = localTime.strftime('%H')
+        localDay = localTime.strftime('%A')
+
+        if (localDay != "Saturday") and (localDay in weeknightOpts):
+            weekNights.append(game)
+        elif (localDay == "Saturday") and (int(localHour) < 15):
+            saturdayEarly.append(game)
+        elif (localDay == "Saturday") and (int(localHour) < 19):
+            saturdayAfternoon.append(game)
+        elif (localDay == "Saturday") and (int(localHour) < 22):
+            saturdayEvening.append(game)
+        elif (localDay == "Saturday") and (int(localHour) >= 22):
+            saturdayLate.append(game)
+        elif (localDay == "Sunday") and (int(localHour) < 8):
+            saturdayLate.append(game)
+        else
+            extraNights.append(game)
+
+    weekSlate = [weekNights, saturdayEarly, saturdayAfternoon, saturdayEvening, saturdayLate, extraNights]
+
+    return weekSlate
 
 
 def getTeamMetrics(seasonYear, team):
