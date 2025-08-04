@@ -124,7 +124,7 @@ def getCalendarWeek(seasonYear, weekNum, seasonType):
             saturdayLate.append(game)
         elif (localDay == "Sunday") and (int(localHour) < 8):
             saturdayLate.append(game)
-        else
+        else:
             extraNights.append(game)
 
     weekSlate = [weekNights, saturdayEarly, saturdayAfternoon, saturdayEvening, saturdayLate, extraNights]
