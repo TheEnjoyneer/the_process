@@ -25,7 +25,7 @@ def getCalendarWeek(seasonYear, weekNum, seasonType):
     client = createClient()
 
     queryStr = """
-    query getCalendarWeek($seasonYear: division!, $weekNum: smallint!, $seasonType: season_type!) {
+    query getCalendarWeek($seasonYear: smallint!, $weekNum: smallint!, $seasonType: String!) {
         game(
             where: {
                 season: { _eq: $seasonYear }
