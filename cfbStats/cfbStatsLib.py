@@ -1,8 +1,11 @@
 # cfbStatsLib.py
 
 import json
+import warnings
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
+
+warnings.filterwarnings("ignore")
 
 endpoint = "https://graphql.collegefootballdata.com/v1/graphql"
 headers = {
@@ -86,6 +89,8 @@ def getCalendarWeek(seasonYear, weekNum, seasonType):
 
 
     # COME BACK AND HAVE WATCHABILITY SCORE ADDED TO EACH GAME'S RESPONSE
+    for i in range(len(result['game'])):
+        result['game'][i]['watchability'] = 100
 
 
     return result
