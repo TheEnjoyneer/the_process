@@ -1,6 +1,7 @@
 # cfbStatsLib.py
 
 import json
+import random
 import warnings
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
@@ -90,7 +91,7 @@ def getCalendarWeek(seasonYear, weekNum, seasonType):
 
     # COME BACK AND HAVE WATCHABILITY SCORE ADDED TO EACH GAME'S RESPONSE
     for i in range(len(result['game'])):
-        result['game'][i]['watchability'] = 100
+        result['game'][i]['watchability'] = random.randint(1,100)
 
 
     return result
