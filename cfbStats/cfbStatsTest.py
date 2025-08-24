@@ -2,7 +2,7 @@
 
 import cfbStatsLib as api
 
-testWeek = api.getCalendarWeek(2024, 1, "regular")
+testWeek = api.getCalendarWeekReg(2024, 1)
 
 print("\n------------- Week Nights -------------")
 print(testWeek[0])
