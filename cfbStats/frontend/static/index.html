@@ -264,17 +264,7 @@
             color: var(--accent-color);
         }
 
-        .watchability-score {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: var(--primary-color);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
+
 
         .completed-game {
             opacity: 0.7;
@@ -320,7 +310,7 @@
 <body>
     <div class="header">
                     <h1>Dr. Moon Pie's CFB Stats Index</h1>
-        <p>College Football Games Schedule and Information</p>
+        <p>Your one stop shop for CFB Stats and Data for Degenerate Gamblers</p>
     </div>
 
     <div class="controls">
@@ -609,7 +599,6 @@
             
             return `
                 <div class="${cardClass}">
-                    <div class="watchability-score">${game.watchability || 'N/A'}</div>
                     <div class="game-matchup">${game.awayTeam} at ${game.homeTeam}</div>
                     <div class="game-time">${formatTime(game.startDate)}</div>
                     <div class="game-venue">${formatVenue(game)}</div>
