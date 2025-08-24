@@ -29,10 +29,10 @@ A one-page web application that displays College Football games information in a
    ```
 
 2. **Access the Web App**:
-   Open your browser and navigate to: `http://localhost:5000`
+   Open your browser and navigate to: `http://localhost:8000`
 
 3. **API Endpoint**:
-   The API endpoint for game data is: `http://localhost:5000/api/games`
+   The API endpoint for game data is: `http://localhost:8000/api/games`
 
 ## Usage
 

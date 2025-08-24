@@ -466,6 +466,9 @@ def get_all_venues():
 
 if __name__ == '__main__':
     print("Starting Dr. Moon Pie's CFB Stats Index...")
+    print("Access the web app at: http://localhost:8000")
+    print("API endpoint: http://localhost:8000/api/games")
+    print("Cache management: http://localhost:8000/api/cache/status")
     
     # Clear expired cache on startup
     clear_expired_cache()
@@ -473,4 +476,4 @@ if __name__ == '__main__':
     # Load and cache all venues on startup
     load_and_cache_all_venues()
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=8000)
