@@ -28,7 +28,9 @@ def calcWatchabilityScore(game):
 
 # CFB Data API related function definitions here
 
-def getCalendarWeek(seasonYear, weekNum, seasonType):
+def getLiveScores(seasonYear, weekNum):
+
+def getCalendarWeekReg(seasonYear, weekNum):
     client = createClient()
 
     queryStr = """
@@ -87,7 +89,7 @@ def getCalendarWeek(seasonYear, weekNum, seasonType):
     variables = {
         "seasonYear": seasonYear,
         "weekNum": weekNum,
-        "seasonType": seasonType
+        "seasonType": "regular"
     }
 
     result = client.execute(query, variable_values=variables)
