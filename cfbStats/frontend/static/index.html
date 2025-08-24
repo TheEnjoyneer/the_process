@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dr. Moon Pie's CFB Stats Index</title>
-    <link rel="icon" type="image/png" href="/assets/Icon Only.png">
+    <link rel="icon" type="image/png" href="https://cfb-stats.com/assets/Icon Only.png">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
         * {
@@ -342,6 +342,9 @@
     <div id="gamesContainer"></div>
 
     <script>
+        // API base URL
+        const API_BASE_URL = 'https://api.cfb-stats.com';
+        
         // Global cache for betting lines and venue data
         const bettingLinesCache = new Map();
         const venueCache = new Map();
@@ -699,7 +702,7 @@
 
             try {
                 // Make API call to the Flask backend
-                const response = await fetch(`/api/games?season=${seasonYear}&week=${weekNum}&type=${seasonType}`);
+                const response = await fetch(`${API_BASE_URL}/api/games?season=${seasonYear}&week=${weekNum}&type=${seasonType}`);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -721,7 +724,7 @@
                                     console.log(`Cache HIT: Venue ${game.venueId}`);
                                 } else {
                                     try {
-                                        const venueResponse = await fetch(`/api/venue/${game.venueId}`);
+                                        const venueResponse = await fetch(`${API_BASE_URL}/api/venue/${game.venueId}`);
                                         if (venueResponse.ok) {
                                             const venueData = await venueResponse.json();
                                             if (!venueData.error) {
@@ -743,7 +746,7 @@
                                     console.log(`Cache HIT: Betting Lines ${game.id}`);
                                 } else {
                                     try {
-                                        const bettingResponse = await fetch(`/api/game-lines/${game.id}`);
+                                        const bettingResponse = await fetch(`${API_BASE_URL}/api/game-lines/${game.id}`);
                                         if (bettingResponse.ok) {
                                             const bettingData = await bettingResponse.json();
                                             if (!bettingData.error) {
@@ -803,7 +806,7 @@
                 z-index: 2;
                 margin-bottom: -15px;
             ">Powered by</span>
-            <img src="/assets/HorizontalWordmark.png" alt="Enjoyneering LLC" style="
+            <img src="https://cfb-stats.com/assets/HorizontalWordmark.png" alt="Enjoyneering LLC" style="
                 height: 100px;
                 width: auto;
                 position: relative;
