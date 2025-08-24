@@ -465,10 +465,7 @@ def get_all_venues():
         return jsonify({'error': f'Error getting venues: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    print("Starting CFB Games Dashboard...")
-    print("Access the web app at: http://localhost:5000")
-    print("API endpoint: http://localhost:5000/api/games")
-    print("Cache management: http://localhost:5000/api/cache/status")
+    print("Starting Dr. Moon Pie's CFB Stats Index...")
     
     # Clear expired cache on startup
     clear_expired_cache()

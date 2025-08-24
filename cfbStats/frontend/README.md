@@ -1,4 +1,4 @@
-# CFB Games Dashboard
+# Dr. Moon Pie's CFB Stats Index
 
 A one-page web application that displays College Football games information in a card-based layout, similar to the Angular app design. The app fetches game data from the GraphQL API using the `getCalendarWeekReg` function from `cfbStatsLib.py`, and venue information from the REST API.
 
