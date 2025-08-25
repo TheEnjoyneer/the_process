@@ -16,6 +16,8 @@ headers = {
     "Authorization": "Bearer pCTgkDkbCkcTh4OWrzO4ph5+/VR/5Fp98y4ORuZCbiG0HKTXt+8Xbs88IfVu4lK9",
     "Content-Type": "application/json"
     }
+# Note: Frontend will handle timezone conversion to user's local timezone
+# This timezone is only used for backend organization if needed
 timezone = pytz.timezone('America/New_York')
 
 # Library functions for internal use definitions here
@@ -23,9 +25,80 @@ def createClient():
     transport = AIOHTTPTransport(url=endpoint, headers=headers)
     return Client(transport=transport, fetch_schema_from_transport=True)
 
-# Come back and update watchability score metric based on old algo
 def calcWatchabilityScore(game):
-    return random.randint(1,100)
+    """
+    Calculate a watchability score (1-100) based on:
+    1. ELO rating closeness (closer = more exciting)
+    2. ELO rating magnitude (higher = more exciting, max 2200)
+    3. Over/Under total (higher = more exciting)
+    4. Spread closeness (closer = more exciting)
+    """
+    score = 0
+    
+    # 1. ELO Rating Component (40% weight)
+    home_elo = game.get('homeStartElo', 1500)
+    away_elo = game.get('awayStartElo', 1500)
+    
+    if home_elo is not None and away_elo is not None:
+        # Calculate ELO closeness (0-100)
+        elo_diff = abs(home_elo - away_elo)
+        elo_closeness = max(0, 100 - (elo_diff / 20))  # 0 diff = 100, 2000 diff = 0
+        
+        # Calculate ELO magnitude bonus (0-30)
+        avg_elo = (home_elo + away_elo) / 2
+        elo_magnitude = min(30, max(0, (avg_elo - 1500) / 23.33))  # 1500 = 0, 2200 = 30
+        
+        elo_score = elo_closeness + elo_magnitude
+        score += elo_score * 0.4  # 40% weight
+    else:
+        # Default ELO score if data missing
+        score += 50 * 0.4
+    
+    # 2. Over/Under Component (30% weight)
+    over_under = None
+    if game.get('lines') and len(game['lines']) > 0:
+        # Use the first available line's over/under
+        over_under = game['lines'][0].get('overUnder')
+    
+    if over_under is not None:
+        # Higher over/under = more exciting (0-100)
+        # Range: 30-80 points (typical CFB range)
+        ou_score = min(100, max(0, (over_under - 30) * 2))  # 30 = 0, 80 = 100
+        score += ou_score * 0.3  # 30% weight
+    else:
+        # Default over/under score if data missing
+        score += 30 * 0.3
+    
+    # 3. Spread Component (30% weight)
+    spread = None
+    if game.get('lines') and len(game['lines']) > 0:
+        # Use the first available line's spread
+        spread = game['lines'][0].get('spread')
+    
+    if spread is not None:
+        # Closer spread = more exciting (0-100)
+        # Range: 0-35 points
+        spread_score = max(0, 100 - (abs(spread) * 2.86))  # 0 = 100, 35 = 0
+        score += spread_score * 0.3  # 30% weight
+    else:
+        # Default spread score if data missing
+        score += 30 * 0.3
+    
+    # 4. Conference Component (10% weight) - Power 5 conference bonus
+    power5_conferences = ["SEC", "Big Ten", "Big 12", "ACC"]
+    away_conference = game.get('awayConference', '')
+    home_conference = game.get('homeConference', '')
+    
+    conference_bonus = 0
+    if away_conference in power5_conferences or home_conference in power5_conferences:
+        conference_bonus = 50  # Bump for Power 5 teams
+    
+    score += conference_bonus * 0.3  # 30% weight
+    
+    # Ensure score is between 1-100
+    final_score = max(1, min(100, round(score)))
+    
+    return final_score
 
 def calcWatchabilityScores(gamesList):
     for i in range(len(gamesList['game'])):
@@ -48,10 +121,7 @@ def getCalendarWeekReg(seasonYear, weekNum):
             season: { _eq: $seasonYear }
             week: { _eq: $weekNum }
             seasonType: { _eq: $seasonType }
-            _or: {
-                homeClassification: { _eq: "fbs" }
-                awayClassification: { _eq: "fbs" }
-            }
+            homeClassification: { _eq: "fbs" }
         }
     ) { 
         attendance
@@ -133,8 +203,13 @@ def getCalendarWeekReg(seasonYear, weekNum):
     saturdayEvening = []    # Anything saturday before 10 eastern
     saturdayLate = []       # Anything leftover
     extraNights = []
+    # Note: Frontend will handle timezone conversion and organization
+    # For now, we'll organize based on UTC time to maintain consistency
+    # The frontend will convert to local time for display and re-organize as needed
     weeknightOpts = ["Tuesday", "Wednesday", "Thursday", "Friday"]
     for game in gamesList:
+        # Parse UTC time and convert to Eastern for organization (backend logic)
+        # Frontend will handle local timezone conversion for display
         currTime = datetime.strptime(game['startDate'], '%Y-%m-%dT%H:%M:%S')
         localTime = currTime.astimezone(timezone)
         localHour = localTime.strftime('%H')
@@ -170,10 +245,7 @@ def getCalendarWeekPost(seasonYear):
             season: { _eq: $seasonYear }
             week: { _eq: $weekNum }
             seasonType: { _eq: $seasonType }
-            _or: {
-                homeClassification: { _eq: "fbs" }
-                awayClassification: { _eq: "fbs" }
-            }
+            homeClassification: { _eq: "fbs" }
         }
     ) { attendance
         awayClassification
@@ -813,6 +885,55 @@ def getAllVenues():
         return {
             "error": f"Error fetching venues: {str(e)}",
             "venues": []
+        }
+
+def getRankings(seasonYear, weekNum):
+    """
+    Get current rankings for the specified season and week.
+    Prioritizes CFP committee rankings when available, falls back to AP poll.
+    
+    Args:
+        seasonYear (int): The season year
+        weekNum (int): The week number
+        
+    Returns:
+        dict: Rankings data with team rankings
+    """
+    headers = {'Authorization': 'Bearer pCTgkDkbCkcTh4OWrzO4ph5+/VR/5Fp98y4ORuZCbiG0HKTXt+8Xbs88IfVu4lK9'}
+    
+    try:
+        # First try to get CFP committee rankings
+        url = f"https://api.collegefootballdata.com/rankings"
+        params = {
+            'year': seasonYear,
+            'week': weekNum,
+            'seasonType': 'regular'
+        }
+        
+        response = requests.get(url, params=params, timeout=10, headers=headers)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            #print(data[0]['polls'])
+            # Look for CFP committee rankings
+            for poll in data[0]['polls']:
+                pollType = str(poll.get('poll'))
+                if pollType == "Playoff Committee Rankings":
+                    return poll['ranks']
+                elif pollType == "AP Top 25":
+                    return poll['ranks']
+    except requests.exceptions.RequestException as e:
+        return {
+            'error': f"Network error fetching rankings: {str(e)}",
+            'type': 'Error',
+            'rankings': {}
+        }
+    except Exception as e:
+        return {
+            'error': f"Error fetching rankings: {str(e)}",
+            'type': 'Error',
+            'rankings': {}
         }
 
 def getTeamMetrics(seasonYear, team):

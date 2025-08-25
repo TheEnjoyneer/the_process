@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timezone Test</title>
+</head>
+<body>
+    <h1>Timezone Conversion Test</h1>
+    <div id="timezone-info"></div>
+    <div id="test-results"></div>
+
+    <script>
+        function getLocalTimeFromUTC(utcDateString) {
+            // Convert UTC string to local time while preserving the original UTC data
+            // The startDate in the game object remains in UTC for data integrity
+            // Explicitly parse as UTC by appending 'Z' if not present
+            let utcString = utcDateString;
+            if (!utcString.endsWith('Z')) {
+                utcString = utcString + 'Z';
+            }
+            const utcDate = new Date(utcString);
+            return {
+                localDate: utcDate,
+                utcDateString: utcDateString, // Preserve original UTC string
+                localHour: utcDate.getHours(),
+                localDay: utcDate.getDay(), // 0 = Sunday, 6 = Saturday
+                localDayName: utcDate.toLocaleDateString('en-US', { weekday: 'long' })
+            };
+        }
+
+        function getLocalTimezoneInfo() {
+            // Get user's local timezone information
+            const now = new Date();
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const timezoneOffset = now.getTimezoneOffset();
+            const offsetHours = Math.abs(Math.floor(timezoneOffset / 60));
+            const offsetMinutes = Math.abs(timezoneOffset % 60);
+            const offsetSign = timezoneOffset <= 0 ? '+' : '-';
+            
+            return {
+                timezone: timezone,
+                offset: `${offsetSign}${offsetHours.toString().padStart(2, '0')}:${offsetMinutes.toString().padStart(2, '0')}`,
+                displayName: `${timezone} (UTC${offsetSign}${offsetHours}:${offsetMinutes.toString().padStart(2, '0')})`
+            };
+        }
+
+        function formatTime(dateString) {
+            // Ensure the date string is treated as UTC
+            let utcString = dateString;
+            if (!utcString.endsWith('Z')) {
+                utcString = utcString + 'Z';
+            }
+            const date = new Date(utcString);
+            return date.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                timeZoneName: 'short'
+            });
+        }
+
+        // Test data - sample game times in UTC
+        const testGames = [
+            { id: 1, awayTeam: "Michigan", homeTeam: "Ohio State", startDate: "2024-11-30T15:30:00" },
+            { id: 2, awayTeam: "Alabama", homeTeam: "Auburn", startDate: "2024-11-30T20:00:00" },
+            { id: 3, awayTeam: "USC", homeTeam: "UCLA", startDate: "2024-11-30T23:30:00" }
+        ];
+
+        // Add debugging function
+        function debugTimeConversion(utcString) {
+            console.log('Original UTC string:', utcString);
+            const withZ = utcString.endsWith('Z') ? utcString : utcString + 'Z';
+            console.log('With Z suffix:', withZ);
+            const date = new Date(withZ);
+            console.log('Parsed date:', date);
+            console.log('Local time string:', date.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                timeZoneName: 'short'
+            }));
+            return date;
+        }
+
+        function organizeGamesByTime(games) {
+            const weekNights = [];
+            const saturdayEarly = [];
+            const saturdayAfternoon = [];
+            const saturdayEvening = [];
+            const saturdayLate = [];
+            const extraNights = [];
+
+            games.forEach(game => {
+                // Convert UTC time to local time for organization
+                const localTime = getLocalTimeFromUTC(game.startDate);
+                const localHour = localTime.localHour;
+                const localDay = localTime.localDay; // 0 = Sunday, 6 = Saturday
+
+                if (localDay !== 6 && localDay >= 1 && localDay <= 5) {
+                    weekNights.push(game);
+                } else if (localDay === 6) {
+                    if (localHour < 15) {
+                        saturdayEarly.push(game);
+                    } else if (localHour < 19) {
+                        saturdayAfternoon.push(game);
+                    } else if (localHour < 22) {
+                        saturdayEvening.push(game);
+                    } else {
+                        saturdayLate.push(game);
+                    }
+                } else if (localDay === 0 && localHour < 8) {
+                    saturdayLate.push(game);
+                } else {
+                    extraNights.push(game);
+                }
+            });
+
+            return [
+                { name: 'Weeknight Games', games: weekNights },
+                { name: 'Saturday Early', games: saturdayEarly },
+                { name: 'Saturday Afternoon', games: saturdayAfternoon },
+                { name: 'Saturday Evening', games: saturdayEvening },
+                { name: 'Saturday Late', games: saturdayLate },
+                { name: 'Other Games', games: extraNights }
+            ];
+        }
+
+        // Display timezone information
+        const timezoneInfo = getLocalTimezoneInfo();
+        document.getElementById('timezone-info').innerHTML = `
+            <h2>Your Local Timezone: ${timezoneInfo.displayName}</h2>
+        `;
+
+        // Test the timezone conversion
+        let resultsHTML = '<h2>Test Results:</h2>';
+        
+        testGames.forEach(game => {
+            const localTime = getLocalTimeFromUTC(game.startDate);
+            const localTimeString = formatTime(game.startDate);
+            
+            // Debug the conversion
+            console.log(`\n--- Debugging ${game.awayTeam} at ${game.homeTeam} ---`);
+            debugTimeConversion(game.startDate);
+            
+            resultsHTML += `
+                <div style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
+                    <h3>${game.awayTeam} at ${game.homeTeam}</h3>
+                    <p><strong>UTC startDate:</strong> ${game.startDate}</p>
+                    <p><strong>Local Time:</strong> ${localTimeString}</p>
+                    <p><strong>Local Hour:</strong> ${localTime.localHour}</p>
+                    <p><strong>Local Day:</strong> ${localTime.localDayName} (${localTime.localDay})</p>
+                    <p><strong>Preserved UTC:</strong> ${localTime.utcDateString}</p>
+                </div>
+            `;
+        });
+
+        // Test organization
+        const organizedGames = organizeGamesByTime(testGames);
+        resultsHTML += '<h2>Game Organization:</h2>';
+        
+        organizedGames.forEach(slate => {
+            if (slate.games.length > 0) {
+                resultsHTML += `<h3>${slate.name} (${slate.games.length} games):</h3>`;
+                slate.games.forEach(game => {
+                    resultsHTML += `<p>- ${game.awayTeam} at ${game.homeTeam} (${formatTime(game.startDate)})</p>`;
+                });
+            }
+        });
+
+        document.getElementById('test-results').innerHTML = resultsHTML;
+    </script>
+</body>
+</html>

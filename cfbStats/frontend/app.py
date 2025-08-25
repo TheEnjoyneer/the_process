@@ -6,10 +6,11 @@ import json
 from datetime import datetime
 import cfbStatsLib as api
 
-# Global cache for games data, game lines, and venues
+# Global cache for games data, game lines, venues, and rankings
 games_cache = {}
 game_lines_cache = {}
 venues_cache = {}
+rankings_cache = {}
 cache_expiry = 10 * 60  # 10 minutes in seconds
 
 def get_cache_key(season_year, week_num, season_type):
@@ -131,6 +132,23 @@ def set_cached_all_venues(data):
         'timestamp': datetime.now()
     }
 
+def get_cached_rankings(season_year, week_num):
+    """Get cached rankings data if available and not expired"""
+    cache_key = f"rankings_{season_year}_{week_num}"
+    if cache_key in rankings_cache:
+        cached_data = rankings_cache[cache_key]
+        if (datetime.now() - cached_data['timestamp']).total_seconds() < cache_expiry:
+            return cached_data['data']
+    return None
+
+def set_cached_rankings(season_year, week_num, data):
+    """Cache rankings data with timestamp"""
+    cache_key = f"rankings_{season_year}_{week_num}"
+    rankings_cache[cache_key] = {
+        'data': data,
+        'timestamp': datetime.now()
+    }
+
 def load_and_cache_all_venues():
     """Load all venues and cache them for quick lookup"""
     try:
@@ -154,6 +172,38 @@ def load_and_cache_all_venues():
             
     except Exception as e:
         print(f"Error loading venues: {e}")
+        return False
+
+def load_and_cache_rankings():
+    """Load current rankings and cache them for quick lookup"""
+    try:
+        print("Loading current rankings for caching...")
+        # Get current rankings for the current season and week from environment
+        import os
+        from datetime import datetime
+        
+        # Get current season from environment or default to current year
+        current_season = int(os.getenv('CFB_SEASON', datetime.now().year))
+        
+        # Get current week from environment or default to 1
+        current_week = int(os.getenv('CFB_WEEK', 1))
+        
+        print(f"Loading rankings for season {current_season}, week {current_week}")
+        
+        rankings = api.getRankings(current_season, current_week)
+        
+        if rankings and isinstance(rankings, list):
+            # Cache the rankings
+            set_cached_rankings(current_season, current_week, rankings)
+            
+            print(f"Successfully cached rankings: {len(rankings)} teams")
+            return True
+        else:
+            print("Failed to load rankings or invalid data format")
+            return False
+            
+    except Exception as e:
+        print(f"Error loading rankings: {e}")
         return False
 
 def clear_expired_cache():
@@ -186,8 +236,17 @@ def clear_expired_cache():
     for key in expired_venues:
         del venues_cache[key]
     
-    if expired_keys or expired_game_lines or expired_venues:
-        print(f"Cleared {len(expired_keys)} expired games cache entries, {len(expired_game_lines)} expired game lines cache entries, and {len(expired_venues)} expired venues cache entries")
+    # Clear expired rankings cache
+    expired_rankings = []
+    for key, value in rankings_cache.items():
+        if (current_time - value['timestamp']).total_seconds() > cache_expiry:
+            expired_rankings.append(key)
+    
+    for key in expired_rankings:
+        del rankings_cache[key]
+    
+    if expired_keys or expired_game_lines or expired_venues or expired_rankings:
+        print(f"Cleared {len(expired_keys)} expired games cache entries, {len(expired_game_lines)} expired game lines cache entries, {len(expired_venues)} expired venues cache entries, and {len(expired_rankings)} expired rankings cache entries")
 
 # Add the parent directory to the path so we can import cfbStatsLib
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -357,6 +416,18 @@ def load_venues_cache():
     except Exception as e:
         return jsonify({'error': f'Error loading venues: {str(e)}'}), 500
 
+@app.route('/api/cache/load-rankings')
+def load_rankings_cache():
+    """Manually trigger rankings cache loading"""
+    try:
+        success = load_and_cache_rankings()
+        if success:
+            return jsonify({'message': 'Rankings loaded and cached successfully'})
+        else:
+            return jsonify({'error': 'Failed to load rankings'}), 500
+    except Exception as e:
+        return jsonify({'error': f'Error loading rankings: {str(e)}'}), 500
+
 @app.route('/api/team/<int:team_id>')
 def get_team_info(team_id):
     """API endpoint to get team information by ID"""
@@ -464,16 +535,46 @@ def get_all_venues():
     except Exception as e:
         return jsonify({'error': f'Error getting venues: {str(e)}'}), 500
 
+@app.route('/api/rankings')
+def get_rankings():
+    """API endpoint to get rankings for a specific season and week"""
+    try:
+        season_year = int(request.args.get('season', 2025))
+        week_num = int(request.args.get('week', 1))
+        
+        # Check cache first
+        cached_data = get_cached_rankings(season_year, week_num)
+        if cached_data:
+            print(f"Cache HIT: Rankings for {season_year} week {week_num}")
+            return jsonify(cached_data)
+        
+        print(f"Cache MISS: Rankings for {season_year} week {week_num}")
+        
+        # Get rankings from the library
+        rankings = api.getRankings(season_year, week_num)
+        print(f"Rankings data: {rankings}")
+        
+        # Check if rankings is valid (should be a list)
+        if rankings and isinstance(rankings, list):
+            # Cache the data
+            set_cached_rankings(season_year, week_num, rankings)
+            return jsonify(rankings)
+        else:
+            print(f"Invalid rankings data: {rankings}")
+            return jsonify({'error': 'No rankings data available'}), 404
+    except Exception as e:
+        return jsonify({'error': f'Error getting rankings: {str(e)}'}), 500
+
 if __name__ == '__main__':
     print("Starting Dr. Moon Pie's CFB Stats Index...")
-    print("Access the web app at: http://localhost:8000")
-    print("API endpoint: http://localhost:8000/api/games")
-    print("Cache management: http://localhost:8000/api/cache/status")
     
     # Clear expired cache on startup
     clear_expired_cache()
     
     # Load and cache all venues on startup
     load_and_cache_all_venues()
+    
+    # Load and cache current rankings on startup
+    load_and_cache_rankings()
     
     app.run(debug=True, host='0.0.0.0', port=8000)

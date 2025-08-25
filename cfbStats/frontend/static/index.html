@@ -185,7 +185,7 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            background: var(--watchability-gradient, linear-gradient(90deg, var(--primary-color), var(--secondary-color)));
         }
 
         .game-matchup {
@@ -195,6 +195,11 @@
             margin-bottom: 15px;
             color: var(--offWhiteText);
             text-shadow: 1px 1px 0 var(--layer1), -1px -1px 0 var(--layer1), 1px -1px 0 var(--layer1), -1px 1px 0 var(--layer1);
+        }
+
+        .ranking-number {
+            font-size: 75%;
+            font-weight: 700;
         }
 
         .game-info {
@@ -345,10 +350,14 @@
         // API base URL
         const API_BASE_URL = 'https://api.cfb-stats.com';
         
-        // Global cache for betting lines and venue data
+        // Global cache for betting lines, venue data, and rankings
         const bettingLinesCache = new Map();
         const venueCache = new Map();
+        const rankingsCache = new Map();
         const cacheExpiry = 5 * 60 * 1000; // 5 minutes in milliseconds
+        
+        // Global rankings data
+        let currentRankingsData = null;
 
         // Loading messages array
         const loadingMessages = [
@@ -395,6 +404,24 @@
             updateCacheStatus();
         }
         
+        function getCachedRankings(seasonYear, weekNum) {
+            const cacheKey = `${seasonYear}_${weekNum}`;
+            const cached = rankingsCache.get(cacheKey);
+            if (cached && (Date.now() - cached.timestamp) < cacheExpiry) {
+                return cached.data;
+            }
+            return null;
+        }
+        
+        function setCachedRankings(seasonYear, weekNum, data) {
+            const cacheKey = `${seasonYear}_${weekNum}`;
+            rankingsCache.set(cacheKey, {
+                data: data,
+                timestamp: Date.now()
+            });
+            updateCacheStatus();
+        }
+        
         function clearExpiredCache() {
             const now = Date.now();
             
@@ -412,6 +439,13 @@
                 }
             }
             
+            // Clear expired rankings cache
+            for (const [key, value] of rankingsCache.entries()) {
+                if (now - value.timestamp > cacheExpiry) {
+                    rankingsCache.delete(key);
+                }
+            }
+            
             updateCacheStatus();
         }
         
@@ -423,21 +457,23 @@
             return {
                 bettingLinesCount: bettingLinesCache.size,
                 venueCount: venueCache.size,
+                rankingsCount: rankingsCache.size,
                 bettingLinesExpired: 0,
-                venueExpired: 0
+                venueExpired: 0,
+                rankingsExpired: 0
             };
         }
         
         function logCacheStats() {
             const stats = getCacheStats();
-            console.log(`Cache Stats - Betting Lines: ${stats.bettingLinesCount}, Venues: ${stats.venueCount}`);
+            console.log(`Cache Stats - Betting Lines: ${stats.bettingLinesCount}, Venues: ${stats.venueCount}, Rankings: ${stats.rankingsCount}`);
         }
         
         function updateCacheStatus() {
             const stats = getCacheStats();
             const cacheStatusElement = document.getElementById('cacheStatus');
             if (cacheStatusElement) {
-                cacheStatusElement.textContent = `Cache: Betting Lines: ${stats.bettingLinesCount}, Venues: ${stats.venueCount}`;
+                cacheStatusElement.textContent = `Cache: Betting Lines: ${stats.bettingLinesCount}, Venues: ${stats.venueCount}, Rankings: ${stats.rankingsCount}`;
             }
         }
 
@@ -485,12 +521,103 @@
         }
 
         function formatTime(dateString) {
-            const date = new Date(dateString);
+            // Ensure the date string is treated as UTC
+            let utcString = dateString;
+            if (!utcString.endsWith('Z')) {
+                utcString = utcString + 'Z';
+            }
+            const date = new Date(utcString);
             return date.toLocaleTimeString('en-US', {
                 hour: 'numeric',
                 minute: '2-digit',
                 timeZoneName: 'short'
             });
+        }
+
+        function getLocalTimeFromUTC(utcDateString) {
+            // Convert UTC string to local time while preserving the original UTC data
+            // The startDate in the game object remains in UTC for data integrity
+            // Explicitly parse as UTC by appending 'Z' if not present
+            let utcString = utcDateString;
+            if (!utcString.endsWith('Z')) {
+                utcString = utcString + 'Z';
+            }
+            const utcDate = new Date(utcString);
+            return {
+                localDate: utcDate,
+                utcDateString: utcDateString, // Preserve original UTC string
+                localHour: utcDate.getHours(),
+                localDay: utcDate.getDay(), // 0 = Sunday, 6 = Saturday
+                localDayName: utcDate.toLocaleDateString('en-US', { weekday: 'long' })
+            };
+        }
+
+        function getLocalTimezoneInfo() {
+            // Get user's local timezone information
+            const now = new Date();
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const timezoneOffset = now.getTimezoneOffset();
+            const offsetHours = Math.abs(Math.floor(timezoneOffset / 60));
+            const offsetMinutes = Math.abs(timezoneOffset % 60);
+            const offsetSign = timezoneOffset <= 0 ? '+' : '-';
+            
+            return {
+                timezone: timezone,
+                offset: `${offsetSign}${offsetHours.toString().padStart(2, '0')}:${offsetMinutes.toString().padStart(2, '0')}`,
+                displayName: `${timezone} (UTC${offsetSign}${offsetHours}:${offsetMinutes.toString().padStart(2, '0')})`
+            };
+        }
+
+            function getExcitementGradient(excitementScore) {
+        // Convert excitement score to a gradient with color ranges and consistent brightness
+        // 1-20: White/Grey, 21-40: Green, 41-60: Blue, 61-80: Purple, 81-100: Orange
+        const score = Math.max(1, Math.min(100, excitementScore || 1));
+            
+            let color;
+            
+            if (score <= 20) {
+                // White/Grey range (1-20): Start with dark grey, progress to light grey
+                const ratio = (score - 1) / 19;
+                const greyValue = Math.round(80 + (180 - 80) * ratio);
+                color = `rgb(${greyValue}, ${greyValue}, ${greyValue})`;
+            } else if (score <= 40) {
+                // Green range (21-40): Start with dark green, progress to bright green
+                const ratio = (score - 21) / 19;
+                const greenValue = Math.round(50 + (150 - 50) * ratio);
+                color = `rgb(0, ${greenValue}, 0)`;
+            } else if (score <= 60) {
+                // Blue range (41-60): Start with dark blue, progress to bright blue
+                const ratio = (score - 41) / 19;
+                const blueValue = Math.round(50 + (200 - 50) * ratio);
+                color = `rgb(0, 0, ${blueValue})`;
+            } else if (score <= 80) {
+                // Purple range (61-80): Start with dark purple, progress to bright purple
+                const ratio = (score - 61) / 19;
+                const purpleValue = Math.round(80 + (200 - 80) * ratio);
+                color = `rgb(${purpleValue}, 0, ${purpleValue})`;
+            } else {
+                // Orange range (81-100): Start with dark orange, progress to bright orange
+                const ratio = (score - 81) / 19;
+                const orangeValue = Math.round(100 + (255 - 100) * ratio);
+                color = `rgb(${orangeValue}, ${Math.round(orangeValue * 0.6)}, 0)`;
+            }
+            
+            // Create gradient with lighter sides and darker center
+            const lighterColor = color.replace(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/, (match, r, g, b) => {
+                const newR = Math.min(255, parseInt(r) + 60);
+                const newG = Math.min(255, parseInt(g) + 60);
+                const newB = Math.min(255, parseInt(b) + 60);
+                return `rgb(${newR}, ${newG}, ${newB})`;
+            });
+            
+            const darkerColor = color.replace(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/, (match, r, g, b) => {
+                const newR = Math.max(0, parseInt(r) - 30);
+                const newG = Math.max(0, parseInt(g) - 30);
+                const newB = Math.max(0, parseInt(b) - 30);
+                return `rgb(${newR}, ${newG}, ${newB})`;
+            });
+            
+            return `linear-gradient(90deg, ${lighterColor}, ${darkerColor}, ${lighterColor})`;
         }
 
         function getTeamAbbreviation(teamName) {
@@ -500,6 +627,102 @@
                 return teamName.substring(0, 3).toUpperCase();
             }
             return words.map(word => word[0]).join('').toUpperCase();
+        }
+
+        function getTeamRanking(teamName, rankingsData) {
+            console.log(`Looking for ranking for: "${teamName}"`);
+            console.log('Rankings data:', rankingsData);
+            
+            if (!rankingsData || !Array.isArray(rankingsData)) {
+                console.log('No rankings data or not an array');
+                return null;
+            }
+            
+            const teamNameLower = teamName.toLowerCase();
+            console.log(`Team name (lowercase): "${teamNameLower}"`);
+            
+            // Search through the rankings array
+            for (const ranking of rankingsData) {
+                const schoolName = ranking.school;
+                if (!schoolName) continue;
+                
+                const schoolNameLower = schoolName.toLowerCase();
+                console.log(`Checking against: "${schoolNameLower}" (rank ${ranking.rank})`);
+                
+                // Try exact match first
+                if (teamNameLower === schoolNameLower) {
+                    console.log(`Exact match found! Rank: ${ranking.rank}`);
+                    return ranking.rank;
+                }
+                
+                // Handle specific known abbreviations and variations (exact matches only)
+                if (teamNameLower === 'usc' && schoolNameLower === 'southern california') {
+                    console.log(`USC match found! Rank: ${ranking.rank}`);
+                    return ranking.rank;
+                }
+                if (teamNameLower === 'ucla' && schoolNameLower === 'university of california los angeles') {
+                    console.log(`UCLA match found! Rank: ${ranking.rank}`);
+                    return ranking.rank;
+                }
+                if (teamNameLower === 'uconn' && schoolNameLower === 'connecticut') {
+                    console.log(`UConn match found! Rank: ${ranking.rank}`);
+                    return ranking.rank;
+                }
+                if (teamNameLower === 'unlv' && schoolNameLower === 'nevada las vegas') {
+                    console.log(`UNLV match found! Rank: ${ranking.rank}`);
+                    return ranking.rank;
+                }
+                if (teamNameLower === 'ole miss' && schoolNameLower === 'mississippi') {
+                    console.log(`Ole Miss match found! Rank: ${ranking.rank}`);
+                    return ranking.rank;
+                }
+                if (teamNameLower === 'mississippi' && schoolNameLower === 'ole miss') {
+                    console.log(`Mississippi match found! Rank: ${ranking.rank}`);
+                    return ranking.rank;
+                }
+                if (teamNameLower === 'nc state' && schoolNameLower === 'north carolina state') {
+                    console.log(`NC State match found! Rank: ${ranking.rank}`);
+                    return ranking.rank;
+                }
+                if (teamNameLower === 'north carolina state' && schoolNameLower === 'nc state') {
+                    console.log(`North Carolina State match found! Rank: ${ranking.rank}`);
+                    return ranking.rank;
+                }
+                if (teamNameLower === 'byu' && schoolNameLower === 'brigham young') {
+                    console.log(`BYU match found! Rank: ${ranking.rank}`);
+                    return ranking.rank;
+                }
+                if (teamNameLower === 'brigham young' && schoolNameLower === 'byu') {
+                    console.log(`Brigham Young match found! Rank: ${ranking.rank}`);
+                    return ranking.rank;
+                }
+            }
+            
+            console.log(`No match found for "${teamName}"`);
+            return null;
+        }
+
+        function formatTeamNameWithRanking(teamName, rankingsData) {
+            const ranking = getTeamRanking(teamName, rankingsData);
+            if (ranking) {
+                console.log(`Found ranking for ${teamName}: ${ranking}`);
+                return `<span class="ranked-team"><span class="ranking-number">${ranking}</span> ${teamName}</span>`;
+            }
+            console.log(`No ranking found for ${teamName}`);
+            return teamName;
+        }
+
+        function displayAllRankings(rankingsData) {
+            if (!rankingsData || !Array.isArray(rankingsData)) {
+                console.log('No rankings data to display');
+                return;
+            }
+            
+            console.log('=== ALL AVAILABLE RANKINGS ===');
+            rankingsData.forEach((ranking, index) => {
+                console.log(`${index + 1}. Rank ${ranking.rank}: ${ranking.school}`);
+            });
+            console.log('=== END RANKINGS ===');
         }
 
         function formatVenue(game) {
@@ -562,27 +785,39 @@
             const saturdayLate = [];
             const extraNights = [];
 
+            console.log(`Organizing ${games.length} games by time...`);
+
             games.forEach(game => {
-                const gameDate = new Date(game.startDate);
-                const localHour = gameDate.getHours();
-                const localDay = gameDate.getDay(); // 0 = Sunday, 6 = Saturday
+                // Convert UTC time to local time for organization
+                const localTime = getLocalTimeFromUTC(game.startDate);
+                const localHour = localTime.localHour;
+                const localDay = localTime.localDay; // 0 = Sunday, 6 = Saturday
+
+                console.log(`${game.awayTeam} at ${game.homeTeam}: Day ${localDay} (${localTime.localDayName}), Hour ${localHour}`);
 
                 if (localDay !== 6 && localDay >= 1 && localDay <= 5) {
                     weekNights.push(game);
+                    console.log(`  → Added to Weeknight Games`);
                 } else if (localDay === 6) {
                     if (localHour < 15) {
                         saturdayEarly.push(game);
+                        console.log(`  → Added to Saturday Early`);
                     } else if (localHour < 19) {
                         saturdayAfternoon.push(game);
+                        console.log(`  → Added to Saturday Afternoon`);
                     } else if (localHour < 22) {
                         saturdayEvening.push(game);
+                        console.log(`  → Added to Saturday Evening`);
                     } else {
                         saturdayLate.push(game);
+                        console.log(`  → Added to Saturday Late`);
                     }
                 } else if (localDay === 0 && localHour < 8) {
                     saturdayLate.push(game);
+                    console.log(`  → Added to Saturday Late (Sunday early)`);
                 } else {
                     extraNights.push(game);
+                    console.log(`  → Added to Other Games`);
                 }
             });
 
@@ -600,16 +835,34 @@
             const isCompleted = game.status === 'final';
             const cardClass = isCompleted ? 'game-card completed-game' : 'game-card';
             
+            // Convert UTC time to local time for display
+            // Note: game.startDate remains in UTC in the object for data integrity
+            const localTime = getLocalTimeFromUTC(game.startDate);
+            const localTimeString = formatTime(game.startDate); // This will show in local timezone
+            
+                    // Get excitement score and create gradient
+        const excitementScore = game.excitement || game.watchability || 1;
+        const gradientStyle = getExcitementGradient(excitementScore);
+            
+            // Format team names with rankings
+            console.log('Creating game card for:', game.awayTeam, 'at', game.homeTeam);
+            console.log('Current rankings data:', currentRankingsData);
+            
+            const awayTeamWithRanking = formatTeamNameWithRanking(game.awayTeam, currentRankingsData);
+            const homeTeamWithRanking = formatTeamNameWithRanking(game.homeTeam, currentRankingsData);
+            
+            console.log('Formatted team names:', awayTeamWithRanking, 'at', homeTeamWithRanking);
+            
             return `
-                <div class="${cardClass}">
-                    <div class="game-matchup">${game.awayTeam} at ${game.homeTeam}</div>
-                    <div class="game-time">${formatTime(game.startDate)}</div>
+                <div class="${cardClass}" style="--watchability-gradient: ${gradientStyle};">
+                    <div class="game-matchup">${awayTeamWithRanking} at ${homeTeamWithRanking}</div>
+                    <div class="game-time">${localTimeString}</div>
                     <div class="game-venue">${formatVenue(game)}</div>
                     
                     <div class="game-info">
                         <div class="info-item">
-                            <div class="info-label">Watchability</div>
-                            <div class="info-value">${game.watchability || game.excitement ? Math.round(game.watchability || game.excitement) : 'N/A'}</div>
+                                            <div class="info-label">Excitement</div>
+                <div class="info-value">${game.excitement || game.watchability ? Math.round(game.excitement || game.watchability) : 'N/A'}</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Home WinProb</div>
@@ -652,15 +905,23 @@
             const container = document.getElementById('gamesContainer');
             container.innerHTML = '';
 
+            console.log(`Displaying ${games.length} games`);
+            
             if (!games || games.length === 0) {
                 container.innerHTML = '<div class="no-games">No games found for the selected criteria.</div>';
                 return;
             }
 
             const organizedGames = organizeGamesByTime(games);
+            console.log('Organized games:', organizedGames);
 
             organizedGames.forEach(slate => {
-                if (slate.games.length === 0) return;
+                console.log(`Processing slate: ${slate.name} with ${slate.games.length} games`);
+                
+                if (slate.games.length === 0) {
+                    console.log(`Skipping empty slate: ${slate.name}`);
+                    return;
+                }
 
                 const slateContainer = document.createElement('div');
                 slateContainer.className = 'slate-container';
@@ -672,14 +933,67 @@
                 const gamesGrid = document.createElement('div');
                 gamesGrid.className = 'games-grid';
 
-                slate.games.forEach(game => {
-                    gamesGrid.innerHTML += createGameCard(game);
+                // Sort games within this slate by excitement score (highest first)
+                const sortedGames = slate.games.sort((a, b) => {
+                    const aScore = a.excitement || a.watchability || 1;
+                    const bScore = b.excitement || b.watchability || 1;
+                    return bScore - aScore; // Sort in descending order (highest first)
+                });
+                
+                sortedGames.forEach(game => {
+                    const gameCardHTML = createGameCard(game);
+                    gamesGrid.insertAdjacentHTML('beforeend', gameCardHTML);
                 });
 
                 slateContainer.appendChild(slateHeader);
                 slateContainer.appendChild(gamesGrid);
                 container.appendChild(slateContainer);
             });
+        }
+
+        async function loadRankings(seasonYear, weekNum) {
+            try {
+                console.log(`Loading rankings for ${seasonYear} week ${weekNum}...`);
+                
+                // Check cache first
+                const cachedRankings = getCachedRankings(seasonYear, weekNum);
+                if (cachedRankings) {
+                    console.log(`Cache HIT: Rankings for ${seasonYear} week ${weekNum}`);
+                    currentRankingsData = cachedRankings;
+                    console.log('Current rankings data:', currentRankingsData);
+                    return;
+                }
+                
+                console.log(`Cache MISS: Rankings for ${seasonYear} week ${weekNum}`);
+                
+                // Fetch rankings from API
+                const response = await fetch(`${API_BASE_URL}/api/rankings?season=${seasonYear}&week=${weekNum}`);
+                console.log('Rankings API response status:', response.status);
+                
+                if (response.ok) {
+                    const rankingsData = await response.json();
+                    console.log('Rankings API response:', rankingsData);
+                    
+                    if (!rankingsData.error && Array.isArray(rankingsData)) {
+                        currentRankingsData = rankingsData;
+                        setCachedRankings(seasonYear, weekNum, rankingsData);
+                        console.log(`Loaded rankings: ${rankingsData.length} teams`);
+                        console.log('Current rankings data:', currentRankingsData);
+                        
+                        // Display all available rankings for debugging
+                        displayAllRankings(rankingsData);
+                    } else {
+                        console.warn('Error loading rankings:', rankingsData.error || 'Invalid data format');
+                        currentRankingsData = null;
+                    }
+                } else {
+                    console.warn('Failed to load rankings, status:', response.status);
+                    currentRankingsData = null;
+                }
+            } catch (error) {
+                console.warn('Error loading rankings:', error);
+                currentRankingsData = null;
+            }
         }
 
         async function loadGames() {
@@ -701,6 +1015,9 @@
             container.innerHTML = '';
 
             try {
+                // Load rankings first
+                await loadRankings(seasonYear, weekNum);
+                
                 // Make API call to the Flask backend
                 const response = await fetch(`${API_BASE_URL}/api/games?season=${seasonYear}&week=${weekNum}&type=${seasonType}`);
                 
